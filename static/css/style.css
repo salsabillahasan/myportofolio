@@ -87,8 +87,12 @@ h1, .brand {
 
 /*Section Hero dengan CSS Grid */
 .hero {
-    padding: 5rem 0 6rem;
+    padding: 5rem 2rem 6rem;
     position: relative;
+    background-image: linear-gradient(rgba(255,249,245,0.2),rgba(255,249,245,0.6)), url("/static/img/wallpaper.png");
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 4rem;
 }
 
 .hero-grid {
@@ -101,8 +105,14 @@ h1, .brand {
     
     position: relative;
     overflow: hidden;
-    background-color: rgba(255, 255, 255, 0.45);
-    border: 1px solid var(--line);
+
+    /* cara buat glass effect */
+    background: rgba(255, 249, 245, 0.45);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border: 1px solid rgba(255, 255, 255, 0.55);
     border-radius: 30px;
     padding: 3.5rem;
     box-shadow: 0 0 30px rgba(184, 92, 120, 0.18);
