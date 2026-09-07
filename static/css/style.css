@@ -436,7 +436,6 @@ h1, .brand {
 
     .mobile-menu {
         display:block;
-        transform: translateX(50px);
     }
 
     .site-header nav {
