@@ -19,38 +19,68 @@
                 <a href="{% url 'main:show_main' %}">Profile</a>
                 <a href="{% url 'main:show_experience' %}">Experience</a>
             </nav>
-            <button class="mobile-menu">⋮</button>
         </div>
     </header>
 
     <main>
         <section class="experience-section" id="experience">
             <div class="container">
-                <p class="section-kicker">Perjalanan saya sejauh ini</p>
-                <h1>Experience</h1>
+                <section class="experience-header">
+                    <h1>Experience</h1>
+                    <p>
+                        A glimpse into my journey, projects, and experiences.
+                    </p>
+                </section>
 
                 <div class="experience-grid">
+
                     {% for experience in experience_list %}
-                    <article class="experience-card">
-                        <span class="experience-category">
-                            {{ experience.get_category_display }}
-                        </span>
-                        <h2>{{ experience.title }}</h2>
-                        <p class="experience-description">
-                            {{ experience.description }}
+
+                    <article>
+
+                        <div class="experience-title">
+                            {% if experience.thumbnail %}
+                            <img 
+                                src="{{ experience.thumbnail }}"
+                                alt="{{ experience.title }} thumbnail"
+                                class="experience-icon"
+                            >
+                            {% endif %}
+
+                            <h3>{{ experience.title }}</h3>
+                        </div>
+
+
+                        <p class="experience-role-title">
+                            {{ experience.role }}
                         </p>
 
-                        {% if experience.is_ongoing %}
-                        <p class="experience-status">Sedang berlangsung</p>
-                        {% else %}
-                        <p class="experience-status">Selesai</p>
-                        {% endif %}
+
+                        <p class="experience-date">
+                            {{ experience.started_at|date:"F Y" }}
+                            -
+                            {% if experience.ended_at %}
+                                {{ experience.ended_at|date:"F Y" }}
+                            {% else %}
+                                Present
+                            {% endif %}
+                        </p>
+
+
+                        <div class="experience-description">
+                            {{ experience.description|safe|linebreaksbr }}
+                        </div>
+
                     </article>
+
                     {% empty %}
+
                     <p class="empty-state">
                         Belum ada pengalaman yang ditambahkan.
                     </p>
+
                     {% endfor %}
+
                 </div>
             </div>
         </section>

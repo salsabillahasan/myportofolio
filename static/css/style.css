@@ -92,7 +92,6 @@ h1, .brand {
     background-image: linear-gradient(rgba(255,249,245,0.2),rgba(255,249,245,0.6)), url("/static/img/wallpaper.png");
     background-size: cover;
     background-position: center;
-    margin-bottom: 4rem;
 }
 
 .hero-grid {
@@ -271,30 +270,12 @@ h1, .brand {
 }
 
 .experience-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+    columns: 2;
+    column-gap: 2rem;
 }
 
-.experience-grid article {
-    padding: 1.5rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background-color: var(--white);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.experience-grid article:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 24px rgba(58, 23, 34, 0.08);
-}
 
 .experience-grid article h3 {
-    margin-bottom: 0.5rem;
-}
-
-.experience-grid article h4 {
-    margin-top: 0.75rem;
     margin-bottom: 0.5rem;
 }
 
@@ -355,6 +336,13 @@ h1, .brand {
     margin: 0.5rem 0;
 }
 
+.experience-grid article h4 {
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-top: 0.75rem;
+    margin-bottom: 5rem;
+}
 
 .experience-grid article p {
     color: var(--text-muted);
@@ -372,71 +360,36 @@ h1, .brand {
     flex-shrink: 0;
 }
 
-/* tadi aku explore cara ini supaya looknya clean dulu gak dempet*/
-.mobile-menu {
-    display: none;
-    width:45px;
-    height:45px;
-    border-radius:50%;
-    background:rgba(255,255,255,0.2);
-    border:1px solid rgba(255,255,255,0.3);
-    backdrop-filter:blur(10px);
-    color:white;
-    font-size:1.5rem;
-}
-
-.experience-section {
-    padding: 4rem 0;
-    border-top: 1px solid var(--line);
-}
-
-.section-kicker {
-    color: var(--accent-dark);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.experience-section h1 {
-    margin: 0.4rem 0 1.5rem;
-    font-size: 2rem;
-}
-
-.experience-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-}
-
-.experience-card {
-    padding: 1.25rem;
-    background-color: #fff;
+.experience-grid article {
+    break-inside: avoid;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
     border: 1px solid var(--line);
     border-radius: var(--radius);
+    background-color: var(--white);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.experience-category {
-    color: var(--accent-dark);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
+.experience-grid article:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(58, 23, 34, 0.08);
 }
 
-.experience-card h2 {
-    margin: 0.5rem 0;
-    font-size: 1.25rem;
+.experience-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    margin-top: 1.5rem;
 }
 
-.experience-description,
-.empty-state {
+.experience-header h1 {
+    font-size: 2rem;
+    color: var(--ink);
+    margin-bottom: 0.8rem;
+}
+
+.experience-header p {
+    font-size: 1rem;
     color: var(--text-muted);
-}
-
-.experience-status {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
 }
 
 @media (max-width: 600px) {
@@ -453,6 +406,8 @@ h1, .brand {
     
     .container {
         max-width: 370px;
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
     .meta-list {
@@ -469,7 +424,53 @@ h1, .brand {
     }
 
     .experience-grid {
-        grid-template-columns: 1fr;
+        columns: 1;
+        width: 100%;
+    }
+
+    .experience-grid article {
+        width: 100%;
+    }
+
+    .experience-title {
+        gap: 0.8rem;
+    }
+
+    .experience-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    nav {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    nav a {
+        font-size: 1rem;
+    }
+
+    .site-header .container {
+        justify-content: center;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .site-header nav {
+        flex-direction: row;
+        justify-content: center;
+        gap: 0.8rem;
+    }
+
+    .site-header nav a {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .site-header .brand {
+        display: block;
+        width: 100%;
+        text-align: center;
     }
 
     .hero-details .bio {
@@ -497,16 +498,8 @@ h1, .brand {
         border-left: 2px solid var(--rose-light);
         border-top: 2px solid var(--rose-light);
     }
-
-    .mobile-menu {
-        display:block;
-    }
-
-    .site-header nav {
-        display:none;
-    }
-
     .brand {
         white-space: nowrap;
+        text-align: center;
     }
 }
