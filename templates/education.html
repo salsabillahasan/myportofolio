@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience - {{ name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="{% url 'main:show_main' %}" class="brand">{{ nickname }}'s Portofolio</a>
+            <nav>
+                <a href="{% url 'main:show_main' %}">Profile</a>
+                <a href="{% url 'main:show_experience' %}">Experience</a>
+                <a href="{% url 'main:show_education' %}">Education</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="experience-section" id="experience">
+            <div class="container">
+                <section class="experience-header">
+                    <h1>Education</h1>
+                    <p>
+                        My academic journey and educational background.
+                    </p>
+                </section>
+
+
+                <div class="experience-grid">
+
+                {% for education in education_list %}
+
+                <article>
+
+                    <div class="experience-title">
+
+                        {% if education.thumbnail %}
+                        <img 
+                            src="{{ education.thumbnail }}"
+                            alt="{{ education.institution }} logo"
+                            class="experience-icon"
+                        >
+                        {% endif %}
+
+                        <h3>{{ education.institution }}</h3>
+
+                    </div>
+
+
+                    <p class="experience-role-title">
+                        {{ education.degree }}
+                    </p>
+
+
+                    <p class="experience-role-title">
+                        {{ education.field_of_study }}
+                    </p>
+
+
+                    <span class="experience-date">
+                        {{ education.started_at|date:"F Y" }}
+                        -
+                        {% if education.ended_at %}
+                            {{ education.ended_at|date:"F Y" }}
+                        {% else %}
+                            Present
+                        {% endif %}
+                    </span>
+
+
+                    <p>
+                        {{ education.description }}
+                    </p>
+
+
+                </article>
+
+                {% empty %}
+
+                <p>
+                    Belum ada pendidikan yang ditambahkan.
+                </p>
+
+                {% endfor %}
+
+                </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+        </div>
+    </footer>
+</body>
+
+</html>
