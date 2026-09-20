@@ -1,6 +1,6 @@
-from django.forms import ModelForm, TextInput, Textarea, URLInput
+from django.forms import ModelForm, TextInput, Textarea, URLInput, DateTimeInput
 
-from main.models import Project
+from main.models import Project, Education
 
 class ProjectForm(ModelForm):
     class Meta:
@@ -50,3 +50,16 @@ class ProjectForm(ModelForm):
                 }
             ),
         }
+
+class EducationForm(ModelForm):
+    class Meta:
+        model = Education
+        fields = [
+            "institution",
+            "degree",
+            "field_of_study",
+            "started_at",
+            "ended_at",
+            "description",
+            "thumbnail",
+        ]

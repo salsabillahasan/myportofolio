@@ -63,3 +63,26 @@ Strategi prompting yang saya gunakan adalah memberikan konteks mengenai kondisi 
 Bagian yang dibantu AI: pemahaman konsep Django MVT, pengelolaan model dan database, migration, debugging error, analisis perbedaan hasil lokal dan deployment, penyesuaian template tutorial dengan struktur project, serta review implementasi fitur baru.
 
 Dokumentasi percakapan AI: ristek.link/AiChatAlsa
+
+### Tugas 3
+1. Menurut saya kita menggunakan ModelForm itu supaya mempermudah pembuatan form pada Django, nah ini juga sudah dijelaskan di tutorial kalau ModelForm ini digunakan supaya struktur form bisa dibuat berdasarkan model Django yang sudah ada, sehingga kita tidak perlu membuat seluruh field form secara manual. Lalu kita diwajibkan untuk menambah CSRF token dikarenakan Django perlu memastikan kalau request pada form tersebut sudah terautorisasi, jadi CSRF token membantu melindungi request tersebut.
+
+2. Setelah mempelajari JSON dan XML saya mengetahui bahwa format JSON ini lebih ringkas dan banyak digunakan dibandingkan dengan XML yang menurut saya syntax-nya lumayan complex menggunakan banyak tag.
+
+3. Awalnya data kita itu masih berupa data yang dikenali Django. Lalu data tersebut kemudian diambil dari database dan akan diubah dulu ke format JSON dengan serialization. Setelah menjadi JSON, data bisa dikirim melalui HTTP response ke client. Kalau data tersebut ingin dipakai lagi di Django sebagai object, JSON tadi bisa dideserialize supaya kembali menjadi object yang bisa diproses oleh Python. Kita harus melakukan serialization dikarenakan model Django tidak otomatis berbentuk JSON, jadi serialization berdasarkan yang saya pahami adalah proses mengubah data ke format yang bisa dikirim sebagai JSON.
+
+---------------------------------------------------------------------------------
+Penggunaan AI - Tugas 3
+
+Dalam mengerjakan Tugas 3 ini, saya menggunakan AI sebagai alat bantu untuk memahami materi dan proses implementasi pada Tutorial 3. Sebelum mengerjakan tugas, saya melihat kembali tutorial, terutama pada contoh pembuatan form untuk bagian Project, sebagai acuan untuk memahami bagaimana implementasi form dilakukan pada Django.
+
+Saya menggunakan AI untuk membantu memahami dan mengimplementasikan ModelForm, CSRF token, Create, Update, Delete, JSON, serialization, dan deserialization. Saya juga menggunakan AI untuk membantu membaca error yang muncul saat menjalankan program, seperti error NoReverseMatch pada URL Update Education, serta untuk membantu memahami perbedaan tipe ID antara model Project dan Education. Selain itu, AI membantu saya dalam menyesuaikan tampilan button pada halaman Education dan mencari penyebab gambar thumbnail yang tidak muncul.
+
+Selama pengerjaan, saya menemukan bahwa saran dari AI tidak selalu dapat langsung diterapkan pada project saya karena AI tidak menjalankan dan melihat kondisi project secara langsung. Beberapa solusi perlu disesuaikan kembali dengan kode yang sudah saya buat.
+Contohnya, ketika terjadi error pada URL Update Education, saya perlu mencocokkan kembali tipe ID pada model Education dengan URL yang digunakan. Saya juga melakukan pengecekan dan testing langsung pada browser untuk memastikan fitur Create, Update, Delete, dan endpoint JSON benar-benar berjalan.
+
+Pada bagian tampilan, saya juga menyesuaikan kembali hasil yang diberikan AI dengan desain portfolio yang saya inginkan, terutama pada posisi dan ukuran button. Untuk bagian thumbnail, saya melakukan percobaan menggunakan link gambar yang dapat diakses langsung oleh browser sampai gambar berhasil ditampilkan.
+
+Strategi prompting yang saya gunakan adalah memberikan konteks project saya terlebih dahulu, kemudian memberikan kode atau error yang sedang saya temui. Setelah itu saya meminta penjelasan secara bertahap dan menyesuaikan solusi berdasarkan struktur project yang sudah saya miliki. Saya tidak hanya meminta kode secara langsung, tetapi juga meminta penjelasan mengenai fungsi dari setiap bagian kode agar saya dapat memahami alasan penggunaannya.
+
+Dokumentasi percakapan AI: ristek.link/AiChatAlsa

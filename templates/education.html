@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block meta %}
-    <title>Add Project - {{ name }}</title>
+    <title>Education - {{ name }}</title>
 {% endblock meta %}
 {% block content %}
 
@@ -12,8 +12,9 @@
                     <p>
                         My academic journey and educational background.
                     </p>
-                </section>
 
+                    <a href="{% url 'main:create_education' %}" class="button project-add-button education-add-button"> <span aria-hidden="true">+</span>Add Education</a>
+                </section>
 
                 <div class="experience-grid">
 
@@ -60,6 +61,22 @@
                     <p>
                         {{ education.description }}
                     </p>
+                    <div class="education-actions">
+                        <a href="{% url 'main:update_education' education.id %}" 
+                        class="education-action edit-action">
+                            Edit
+                        </a>
+
+                        <form method="post"
+                            action="{% url 'main:delete_education' education.id %}"
+                            style="display: inline;">
+                            {% csrf_token %}
+
+                            <button type="submit" class="education-action delete-action">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
 
 
                 </article>
