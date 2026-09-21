@@ -1,4 +1,4 @@
-from django.forms import ModelForm, TextInput, Textarea, URLInput, DateTimeInput
+from django.forms import ModelForm, TextInput, Textarea, URLInput, DateInput
 
 from main.models import Project, Education
 
@@ -63,3 +63,65 @@ class EducationForm(ModelForm):
             "description",
             "thumbnail",
         ]
+
+        labels = {
+            "institution": "Institution",
+            "degree": "Degree",
+            "field_of_study": "Field of Study",
+            "started_at": "Started At",
+            "ended_at": "Ended At",
+            "description": "Description",
+            "thumbnail": "Logo",
+        }
+
+        widgets = {
+            "institution": TextInput(
+                attrs={
+                    "placeholder": "Universitas Indonesia",
+                    "maxlength": 255,
+                }
+            ),
+            "degree": Textarea(
+                attrs={
+                    "placeholder": "Bachelor's Degree",
+                    "rows": 3,
+                }
+            ),
+            "field_of_study": TextInput(
+                attrs={
+                    "placeholder": "Information Systems",
+                }
+            ),
+            "started_at": DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                }
+            ),
+            "ended_at": DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                }
+            ),
+            "description": TextInput(
+                attrs={
+                    "placeholder": "Tell us about your education experience",
+                }
+            ),
+            "thumbnail": URLInput(
+                attrs={
+                    "placeholder": "YYYY-MM-DD",
+                }
+            ),
+            "description": TextInput(
+                attrs={ 
+                    "placeholder": "Tell us about your education experience",
+                }
+            ),
+            "thumbnail": URLInput(
+                attrs={
+                    "placeholder": "https://drive.google.com/thumbnail?id=...&sz=w1000",
+                }
+            ),
+        }
