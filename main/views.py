@@ -5,6 +5,8 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from main.models import Experience, Education, Project
 from main.forms import ProjectForm, EducationForm
+from django.contrib.auth import login, logout
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 
 def show_main(request):
@@ -19,6 +21,21 @@ def show_main(request):
     }
     return render(request, "index.html", context)
 
+def register(request):
+    form = UserCreationForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Akun berhasil dibuat. Silakan login.")
+        return redirect("main:login")
+
+    context = {
+        "name": "Salsabilla Hasan",
+        "nickname": "Alsa",
+        "form": form,
+    }
+
+    return render(request, "register.html", context)
 
 def show_experience(request):
     context = {
