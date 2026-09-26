@@ -1,70 +1,113 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block meta %}
     <title>Experience - {{ name }}</title>
 {% endblock meta %}
+
 {% block content %}
-<main>
-        <section class="experience-section" id="experience">
-            <div class="container">
-                <section class="experience-header">
-                    <h1>Experience</h1>
-                    <p>
-                        A glimpse into my journey, projects, and experiences.
-                    </p>
-                </section>
+<main class="experience-page" id="experience">
 
-                <div class="experience-grid">
+    <!-- ========== HEADER: roll film + koper + roll film ========== -->
+    <section class="journey-header">
+        <div class="film-strip film-strip--left">
+            {% for photo in film_left %}
+                {% if photo %}
+                    <img class="film-strip__slot" src="{{ photo }}" alt="">
+                {% else %}
+                    <span class="film-strip__slot film-strip__slot--empty"></span>
+                {% endif %}
+            {% endfor %}
+            <img class="film-strip__frame" src="{% static 'img/filmstrip.png' %}" alt="">
+        </div>
 
-                    {% for experience in experience_list %}
-
-                    <article>
-
-                        <div class="experience-title">
-                            {% if experience.thumbnail %}
-                            <img 
-                                src="{{ experience.thumbnail }}"
-                                alt="{{ experience.title }} thumbnail"
-                                class="experience-icon"
-                            >
-                            {% endif %}
-
-                            <h3>{{ experience.title }}</h3>
-                        </div>
-
-
-                        <p class="experience-role-title">
-                            {{ experience.role }}
-                        </p>
-
-
-                        <p class="experience-date">
-                            {{ experience.started_at|date:"F Y" }}
-                            -
-                            {% if experience.ended_at %}
-                                {{ experience.ended_at|date:"F Y" }}
-                            {% else %}
-                                Present
-                            {% endif %}
-                        </p>
-
-
-                        <div class="experience-description">
-                            {{ experience.description|safe|linebreaksbr }}
-                        </div>
-
-                    </article>
-
-                    {% empty %}
-
-                    <p class="empty-state">
-                        Belum ada pengalaman yang ditambahkan.
-                    </p>
-
-                    {% endfor %}
-
-                </div>
+        <div class="suitcase">
+            <img class="suitcase__img" src="{% static 'img/suitcase.png' %}" alt="">
+            <div class="suitcase__label">
+                <h1 class="suitcase__title">The Journey</h1>
+                <p class="suitcase__text">A glimpse into my journey, projects, and experiences.</p>
             </div>
-        </section>
-    </main>
-{% endblock content %}
+        </div>
 
+        <div class="film-strip film-strip--right">
+            {% for photo in film_right %}
+                {% if photo %}
+                    <img class="film-strip__slot" src="{{ photo }}" alt="">
+                {% else %}
+                    <span class="film-strip__slot film-strip__slot--empty"></span>
+                {% endif %}
+            {% endfor %}
+            <img class="film-strip__frame" src="{% static 'img/filmstrip.png' %}" alt="">
+        </div>
+    </section>
+
+    {% if user.is_superuser %}
+        <div class="journey-add">
+            <a href="{% url 'main:create_experience' %}" class="btn btn--gold">
+                <span aria-hidden="true">+</span> Add Experience
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- ========== TIMELINE ========== -->
+    <section class="timeline" aria-label="Experience timeline">
+        {% for experience in experience_list %}
+            <article class="timeline__row {% if forloop.counter|divisibleby:2 %}timeline__row--reverse{% endif %}">
+
+                <!-- Teks -->
+                <div class="timeline__text">
+                    <p class="timeline__date label">
+                        {{ experience.started_at|date:"M Y" }}
+                        {% if experience.ended_at %}
+                            — {{ experience.ended_at|date:"M Y" }}
+                        {% else %}
+                            — Present
+                        {% endif %}
+                    </p>
+                    <h2 class="timeline__title">{{ experience.title }}</h2>
+                    <p class="timeline__role">{{ experience.role }}</p>
+                    <div class="timeline__desc">{{ experience.description|safe|linebreaksbr }}</div>
+
+                    {% if user.is_superuser %}
+                        <div class="timeline__actions">
+                            <a href="{% url 'main:update_experience' experience.id %}" class="btn btn--burgundy">Edit</a>
+                            <form method="post"
+                                  action="{% url 'main:delete_experience' experience.id %}"
+                                  onsubmit="return confirm('Delete {{ experience.title|escapejs }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn--danger-outline">Delete</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Titik di garis -->
+                <span class="timeline__node" aria-hidden="true"></span>
+
+                <!-- Foto berjepit -->
+                <div class="timeline__photo">
+                    <figure class="polaroid">
+                        <img class="polaroid__clip" src="{% static 'img/clip.png' %}" alt="">
+                        {% if experience.photo_src %}
+                            <img class="polaroid__img" src="{{ experience.photo_src }}" alt="Activity photo: {{ experience.title }}">
+                        {% else %}
+                            <div class="polaroid__img polaroid__img--empty">
+                                <span class="label">Activity Photo</span>
+                            </div>
+                        {% endif %}
+                        <figcaption class="polaroid__caption">
+                            {% if experience.logo_src %}
+                                <img class="polaroid__logo" src="{{ experience.logo_src }}" alt="{{ experience.title }} logo">
+                            {% else %}
+                                <span class="polaroid__name">{{ experience.title }}</span>
+                            {% endif %}
+                        </figcaption>
+                    </figure>
+                </div>
+            </article>
+        {% empty %}
+            <p class="timeline__empty">No experience added yet.</p>
+        {% endfor %}
+    </section>
+</main>
+{% endblock content %}
