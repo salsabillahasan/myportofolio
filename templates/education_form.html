@@ -17,6 +17,7 @@
                 </h1>
 
                 <form method="post"
+                      enctype="multipart/form-data"
                       action="{% if education %}
                                 {% url 'main:update_education' education.id %}
                             {% else %}

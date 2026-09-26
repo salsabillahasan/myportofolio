@@ -14,6 +14,7 @@
                     {% endif %}
                 </h1>
                 <form method="post"
+                      enctype="multipart/form-data"
                       action="
                       {% if project %}
                           {% url 'main:update_project' project.id %}
