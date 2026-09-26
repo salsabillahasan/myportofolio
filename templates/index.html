@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block meta %}
     <title>{{ name }} - Portfolio</title>
@@ -6,36 +7,89 @@
 
 {% block content %}
     <main>
+        <!-- ========== HERO: latar warna + bingkai oval ========== -->
         <section class="hero" id="profile">
-            <div class="container hero-grid">
-                <div class="hero-identity">
-                    <p class="hero-kicker">Information Systems &middot; Universitas Indonesia</p>
-                    <h1>{{ name }}</h1>
+            <div class="hero-inner">
+                <h1 class="sr-only">{{ name }}</h1>
+
+                <div class="hero-name">
+                    <span class="hero-name__part hero-name__part--first" aria-hidden="true">Salsabilla</span>
+
+                    <div class="hero-frame">
+                        <img class="avatar" src="{% static 'img/salsabilla.png' %}" alt="Photo of {{ name }}">
+                        <img class="hero-frame__frame" src="{% static 'img/frame-oval.png' %}" alt="">
+                        <img class="hero-stars hero-stars--right" src="{% static 'img/stars.png' %}" alt="">
+                        <img class="hero-stars hero-stars--left" src="{% static 'img/stars.png' %}" alt="">
+                    </div>
+
+                    <span class="hero-name__part hero-name__part--last" aria-hidden="true">Hasan</span>
                 </div>
-                <div class="hero-photo">
-                    <div class="photo-block"></div>
-                    <img class="avatar" src="/static/img/salsabilla.png" alt="Photo of {{ name }}">
+
+                <p class="hero-kicker label">Information Systems &middot; Universitas Indonesia</p>
+                <p class="bio">&ldquo;{{ bio }}&rdquo;</p>
+
+                <!-- ornamen sulur emas -->
+                <svg class="hero-ornament" viewBox="0 0 360 40" aria-hidden="true">
+                    <g fill="none" stroke="#d4af5f" stroke-width="1.4" stroke-linecap="round">
+                        <path d="M170 20 H122 C104 20 98 6 86 6 C74 6 71 20 81 22 C89 24 93 16 87 13"/>
+                        <path d="M122 20 C92 20 72 33 44 30 C28 28 14 22 4 20"/>
+                        <g transform="translate(360 0) scale(-1 1)">
+                            <path d="M170 20 H122 C104 20 98 6 86 6 C74 6 71 20 81 22 C89 24 93 16 87 13"/>
+                            <path d="M122 20 C92 20 72 33 44 30 C28 28 14 22 4 20"/>
+                        </g>
+                    </g>
+                    <path d="M180 11 L189 20 L180 29 L171 20 Z" fill="#d4af5f"/>
+                </svg>
+            </div>
+        </section>
+
+        <!-- ========== PROFILE: tiket masuk galeri ========== -->
+        <section class="profile-section" aria-labelledby="profile-title">
+
+            <div class="ticket">
+                <img class="ticket__clip" src="{% static 'img/clip.png' %}" alt="">
+                <img class="ticket__stars" src="{% static 'img/stars.png' %}" alt="">
+
+                <!-- badan tiket -->
+                <div class="ticket__body">
+                    <div class="ticket__inner">
+                        <div class="ticket__top">
+                            <div>
+                                <p class="label">Ticket Holder</p>
+                                <p class="ticket__holder">{{ name }}</p>
+                            </div>
+                            <p class="ticket__number">No. {{ npm }}</p>
+                        </div>
+
+                        <div class="divider-diamond" aria-hidden="true"><span></span></div>
+
+                        <dl class="ticket__data">
+                            <div>
+                                <dt class="label">NPM</dt>
+                                <dd>{{ npm }}</dd>
+                            </div>
+                            <div>
+                                <dt class="label">Program</dt>
+                                <dd>{{ study_program }}</dd>
+                            </div>
+                            <div>
+                                <dt class="label">Last Login Session</dt>
+                                <dd class="is-note">{{ last_login }}</dd>
+                            </div>
+                        </dl>
+                    </div>
                 </div>
-                <div class="hero-details">
-                    <p class="bio">{{ bio }}</p>
-                    <dl class="meta-list">
-                        <div class="meta-row">
-                            <dt>NPM</dt>
-                            <dd>{{ npm }}</dd>
-                        </div>
-                        <div class="meta-row">
-                            <dt>Program</dt>
-                            <dd>{{ study_program }}</dd>
-                        </div>
-                        <div class="meta-row">
-                            <dt>Sesi Terakhir Login</dt>
-                            <dd>{{ last_login }}</dd>
-                        </div>
-                    </dl>
-                    <div class="social-links">
-                        <a href="https://github.com/salsabillahasan" class="social-link">GitHub</a>
-                        <a href="https://www.linkedin.com/in/salsabilla-hasan-55104037b" class="social-link">LinkedIn</a>
-                        <a href="mailto:salsaahasan02@gmail.com" class="social-link">Email</a>
+
+                <!-- sobekan tiket -->
+                <div class="ticket__stub">
+                    <div class="ticket__stub-inner">
+                        <p class="label">Admit One</p>
+                        <img class="ticket__seal" src="{% static 'img/seal.png' %}" alt="">
+                        <nav class="ticket__links label" aria-label="Profile links">
+                            <a href="https://github.com/salsabillahasan">GitHub</a>
+                            <a href="https://www.linkedin.com/in/salsabilla-hasan-55104037b">LinkedIn</a>
+                            <a href="mailto:salsaahasan02@gmail.com">Email</a>
+                        </nav>
                     </div>
                 </div>
             </div>
