@@ -6,33 +6,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,600&family=Poppins:wght@400;500;600&family=Pinyon+Script&family=Special+Elite&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block meta %} {% endblock meta %}
 </head>
 
 <body>
+  {% with page=request.resolver_match.url_name %}
   <header class="site-header">
     <div class="container">
         <a href="{% url 'main:show_main' %}" class="brand">{{ nickname }}'s Portfolio</a>
-        <nav>
-            <a href="{% url 'main:show_main' %}">Profile</a>
-            <a href="{% url 'main:show_experience' %}">Experience</a>
-            <a href="{% url 'main:show_education' %}">Education</a>
-            <a href="{% url 'main:show_projects' %}">Projects</a>
+        <nav aria-label="Main navigation">
+            <a href="{% url 'main:show_main' %}" {% if page == 'show_main' %}aria-current="page"{% endif %}>Profile</a>
+            <a href="{% url 'main:show_experience' %}" {% if page == 'show_experience' %}aria-current="page"{% endif %}>Experience</a>
+            <a href="{% url 'main:show_education' %}" {% if page == 'show_education' %}aria-current="page"{% endif %}>Education</a>
+            <a href="{% url 'main:show_projects' %}" {% if page == 'show_projects' %}aria-current="page"{% endif %}>Projects</a>
             {% if user.is_authenticated %}
                 <span class="nav-user">
-                    <span class="nav-user-icon">♡</span>
+                    <span class="nav-user-icon" aria-hidden="true">♡</span>
                     {{ user.username }}
                 </span>
                 <a href="{% url 'main:logout' %}">Logout</a>
             {% else %}
-                <a href="{% url 'main:login' %}">Login</a>
-                <a href="{% url 'main:register' %}">Register</a>
+                <a href="{% url 'main:login' %}" {% if page == 'login' %}aria-current="page"{% endif %}>Login</a>
+                <a href="{% url 'main:register' %}" class="nav-cta">Register</a>
             {% endif %}
         </nav>
     </div>
   </header>
+  {% endwith %}
+
   {% block content %} {% endblock content %}
 
   <footer class="site-footer">
@@ -40,5 +43,18 @@
           <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
       </div>
   </footer>
+
+  <!-- Navbar sticky: tambah class "is-scrolled" saat halaman digulir -->
+  <script>
+      (function () {
+          var header = document.querySelector('.site-header');
+          if (!header) return;
+          function update() {
+              header.classList.toggle('is-scrolled', window.scrollY > 40);
+          }
+          window.addEventListener('scroll', update, { passive: true });
+          update();
+      })();
+  </script>
 </body>
 </html>
