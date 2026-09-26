@@ -6,9 +6,20 @@
     <main>
         <section class="experience-section">
             <div class="container">
-                <h1>Add New Projects</h1>
+                <h1>
+                    {% if project %}
+                        Edit Project
+                    {% else %}
+                        Add New Project
+                    {% endif %}
+                </h1>
                 <form method="post"
-                      action="{% url 'main:create_project' %}"
+                      action="
+                      {% if project %}
+                          {% url 'main:update_project' project.id %}
+                      {% else %}
+                          {% url 'main:create_project' %}
+                      {% endif %}"
                       class="project-form">
                     {% csrf_token %}
                     {% for field in form %}
@@ -21,7 +32,13 @@
                         </div>
                     {% endfor %}
                     <div class="form-actions">
-                        <button type="submit" class="button">Tambah Project</button>
+                        <button type="submit" class="button">
+                            {% if project %}
+                                Simpan Perubahan
+                            {% else %}
+                                Tambah Project
+                            {% endif %}
+                        </button>
                         <a href="{% url 'main:show_projects' %}" class="button button-secondary">Batal</a>
                     </div>
                 </form>

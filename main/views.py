@@ -69,10 +69,13 @@ def show_education(request):
         for education in education_objects
     ]
 
+    is_editor = request.user.groups.filter(name="Editor").exists()
+
     context = {
         "education_list": education_list,
         "nickname": "Alsa",
         "name": "Salsabilla Hasan",
+        "is_editor": is_editor,
     }
 
     return render(request, "education.html", context)   
@@ -101,6 +104,8 @@ def create_education(request):
 def update_education(request, education_id):
     if not request.user.is_superuser:
         raise PermissionDenied
+    
+    is_editor = request.user.groups.filter(name="Editor").exists()
 
     education = get_object_or_404(Education, pk=education_id)
 
@@ -144,11 +149,14 @@ def show_projects(request):
     projects = [project.object for project in projects]
     title_query = request.GET.get("title", "").strip()
 
+    is_editor = request.user.groups.filter(name="Editor").exists()
+
     context = {
         "name": "Salsabilla Hasan",
         "nickname": "Alsa",
         "project_list": projects,
         "title_query": title_query,
+        "is_editor": is_editor,
     }
     return render(request, "project.html", context)
 
@@ -169,6 +177,31 @@ def create_project(request):
         "nickname": "Alsa",
         "form": form,
     }
+    return render(request, "projects_form.html", context)
+
+@login_required(login_url="/login/")
+def update_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+
+    is_editor = request.user.groups.filter(name="Editor").exists()
+
+    if not request.user.is_superuser and not is_editor:
+        raise PermissionDenied
+
+    form = ProjectForm(request.POST or None, instance=project)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Project berhasil diperbarui!")
+        return redirect("main:show_projects")
+
+    context = {
+        "name": "Salsabilla Hasan",
+        "nickname": "Alsa",
+        "form": form,
+        "project": project,
+    }
+
     return render(request, "projects_form.html", context)
 
 def get_projects_json(request):

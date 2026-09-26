@@ -86,3 +86,11 @@ Pada bagian tampilan, saya juga menyesuaikan kembali hasil yang diberikan AI den
 Strategi prompting yang saya gunakan adalah memberikan konteks project saya terlebih dahulu, kemudian memberikan kode atau error yang sedang saya temui. Setelah itu saya meminta penjelasan secara bertahap dan menyesuaikan solusi berdasarkan struktur project yang sudah saya miliki. Saya tidak hanya meminta kode secara langsung, tetapi juga meminta penjelasan mengenai fungsi dari setiap bagian kode agar saya dapat memahami alasan penggunaannya.
 
 Dokumentasi percakapan AI: ristek.link/AiChatAlsa
+
+
+### Tugas 4
+Dalam Individual Assignment 4, saya mempelajari cara menerapkan role editor pada website Django. Saya belajar menggunakan Django Group untuk menentukan pengguna yang memiliki akses sebagai editor.
+
+Saya juga memahami cara membedakan hak akses Eeitor dengan pengguna biasa dan superuser, terutama bahwa editor hanya dapat mengubah data tanpa dapat membuat atau menghapus data. Selain itu, saya belajar bahwa pembatasan tersebut harus diperiksa di sisi server agar akses tetap aman meskipun pengguna mencoba menjalankan aksi secara langsung.
+
+Dengan bantuan AI sebagai teman belajar, saya dapat memahami konsep, mencari kesalahan pada implementasi, dan menyesuaikan kode dengan project yang saya kerjakan sendiri.
