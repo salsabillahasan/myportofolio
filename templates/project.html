@@ -1,74 +1,188 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block meta %}
     <title>Projects - {{ name }}</title>
 {% endblock meta %}
-{% block content %}
-    <main>
-        <section class="experience-section" id="experience">
-            <div class="container">
-                <p class="section-kicker">Karya yang saya bangun</p>
-                <div class="project-header">
-                    <h1>Projects</h1>
-                    {% if user.is_superuser %}
-                    <a href="{% url 'main:create_project' %}"
-                       class="button project-add-button">
-                        <span aria-hidden="true">+</span>
-                        Tambah Proyek
-                    </a>
-                    {% endif %}
-                </div>
-                <form method="get"
-                      action="{% url 'main:show_projects' %}"
-                      class="project-search">
-                    <input type="search"
-                           name="title"
-                           value="{{ title_query }}"
-                           placeholder="Cari berdasarkan nama proyek"
-                           class="project-search__input"
-                           aria-label="Cari berdasarkan nama proyek">
-                    <button type="submit" class="button">Cari</button>
-                </form>
-                <div class="experience-grid project-grid">
-                    {% for project in project_list %}
-                        <article class="experience-card">
-                            {% if project.project_image_url %}
-                                <img src="{{ project.project_image_url }}"
-                                     alt="Gambar {{ project.title }}"
-                                     class="project-image">
-                            {% endif %}
-                            <h2>{{ project.title }}</h2>
-                            <span class="experience-category">{{ project.tech_stack }}</span>
-                            <p class="experience-description">{{ project.description }}</p>
-                            <div class="project-card-actions">
-                                <div class="project-actions">
-                                    {% if project.project_url %}
-                                        <a href="{{ project.project_url }}" class="button">Lihat Project</a>
-                                    {% endif %}
 
+{% block content %}
+<main class="projects-page">
+
+    <!-- ========== ATAS: mesin tik + cari + amplop ========== -->
+    <section class="projects-top">
+        <div class="typewriter">
+            <img class="typewriter__img" src="{% static 'img/typewriter.png' %}" alt="">
+            <div class="typewriter__paper">
+                <h1 class="typewriter__title">Projects</h1>
+                <p class="typewriter__text">Works I've built</p>
+            </div>
+        </div>
+
+        <div class="projects-tools">
+            <form method="get" action="{% url 'main:show_projects' %}" class="project-search-box" role="search">
+                <label for="project-search" class="label">Search works</label>
+                <div class="project-search-box__row">
+                    <input type="search" id="project-search" name="title"
+                           value="{{ title_query }}" placeholder="Search">
+                    <button type="submit" class="btn btn--burgundy">Search</button>
+                </div>
+            </form>
+
+            {% if user.is_superuser %}
+                <div class="envelope-card">
+                    <div class="envelope-card__art" aria-hidden="true">
+                        <img class="envelope-card__envelope" src="{% static 'img/envelope.png' %}" alt="">
+                        <img class="envelope-card__seal" src="{% static 'img/seal.png' %}" alt="">
+                    </div>
+                    <div class="envelope-card__text">
+                        <p class="label">Next Collection</p>
+                        <p class="envelope-card__note">This envelope awaits a new work.</p>
+                        <a href="{% url 'main:create_project' %}" class="btn btn--gold">
+                            <span aria-hidden="true">+</span> Add Project
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ========== BAWAH: kertas merah sobek + carousel ========== -->
+    <section class="projects-wall" aria-label="Project gallery">
+        <svg class="torn torn--top" viewBox="0 0 1440 36" preserveAspectRatio="none" aria-hidden="true">
+            <polygon points="0,0 1440,0 1440,18 1400,26 1362,14 1318,24 1270,12 1228,28 1180,16 1140,24 1096,10 1050,26 1004,14 960,22 918,12 872,28 826,16 782,24 740,10 694,26 650,14 604,22 560,12 516,28 470,16 428,24 384,12 340,26 296,14 252,24 206,10 162,26 118,16 74,24 36,12 0,22" fill="#f7efe3"/>
+            <polygon points="0,0 1440,0 1440,12 1400,20 1362,8 1318,18 1270,6 1228,22 1180,10 1140,18 1096,4 1050,20 1004,8 960,16 918,6 872,22 826,10 782,18 740,4 694,20 650,8 604,16 560,6 516,22 470,10 428,18 384,6 340,20 296,8 252,18 206,4 162,20 118,10 74,18 36,6 0,16" fill="#efe6da"/>
+        </svg>
+
+        <div class="carousel" data-carousel>
+            <button type="button" class="carousel__arrow carousel__arrow--prev" data-prev aria-label="Previous project">
+                <svg viewBox="0 0 22 22" aria-hidden="true"><path d="M15 3 L5 11 L15 19 Z"/></svg>
+            </button>
+
+            <div class="carousel__track">
+                {% for project in project_list %}
+                    <article class="pcard" data-card>
+                        <img class="pcard__clip" src="{% static 'img/clip.png' %}" alt="">
+
+                        <div class="pcard__frame">
+                            <div class="pcard__mat">
+                                {% if project_image_src %}
+                                    <img class="pcard__image" src="{{ project_image_src }}" alt="Screenshot of {{ project.title }}">
+                                {% else %}
+                                    <div class="pcard__image pcard__image--empty">
+                                        <span class="label">Project Image</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="pcard__body">
+                            <div class="pcard__meta">
+                                <span class="pcard__badge">Collection No. {{ forloop.counter|stringformat:"02d" }}</span>
+                                <span class="pcard__stars">&#9734; {{ project.starred_by.count }} stars</span>
+                            </div>
+
+                            <h2 class="pcard__title">{{ project.title }}</h2>
+                            <p class="pcard__desc">{{ project.description }}</p>
+
+                            <ul class="pcard__tags" aria-label="Tech stack">
+                                {% for tech in project.tech_list %}
+                                    <li>{{ tech }}</li>
+                                {% endfor %}
+                            </ul>
+
+                            <!-- Kartu samping: klik untuk memindahkan ke tengah -->
+                            <button type="button" class="btn pcard__focus" data-focus>See Details</button>
+
+                            <!-- Kartu tengah: tombol lengkap -->
+                            <div class="pcard__main-actions">
+                                {% if project.project_url %}
+                                    <a href="{{ project.project_url }}" class="btn btn--burgundy pcard__cta" target="_blank" rel="noopener">See Details</a>
+                                {% endif %}
+
+                                <div class="pcard__row">
                                     {% include "components/project_star.html" with project=project %}
 
-                                     {% if user.is_superuser or is_editor %}
-                                        <a href="{% url 'main:update_project' project.id %}"
-                                        class="button">
-                                            Edit Project
-                                        </a>
+                                    {% if user.is_superuser or is_editor %}
+                                        <a href="{% url 'main:update_project' project.id %}" class="btn btn--outline">Edit</a>
                                     {% endif %}
 
                                     {% if user.is_superuser %}
-                                    {% include "components/project_delete_modal.html" with project=project %}
+                                        {% include "components/project_delete_modal.html" with project=project %}
                                     {% endif %}
                                 </div>
                             </div>
-                        </article>
-                    {% empty %}
+                        </div>
+                    </article>
+                {% empty %}
+                    <p class="projects-empty">
                         {% if title_query %}
-                            <p class="empty-state">Tidak ada proyek dengan nama tersebut.</p>
+                            No project found with that name.
                         {% else %}
-                            <p class="empty-state">Belum ada proyek yang ditambahkan.</p>
+                            No projects added yet.
                         {% endif %}
-                    {% endfor %}
-                </div>
+                    </p>
+                {% endfor %}
             </div>
-        </section>
-    </main>
+
+            <button type="button" class="carousel__arrow carousel__arrow--next" data-next aria-label="Next project">
+                <svg viewBox="0 0 22 22" aria-hidden="true"><path d="M7 3 L17 11 L7 19 Z"/></svg>
+            </button>
+
+            <div class="carousel__dots" data-dots></div>
+        </div>
+
+        <svg class="torn torn--bottom" viewBox="0 0 1440 36" preserveAspectRatio="none" aria-hidden="true">
+            <polygon points="0,0 1440,0 1440,20 1396,12 1352,26 1306,14 1262,24 1218,10 1172,26 1128,16 1084,24 1040,12 994,28 950,14 906,22 860,10 816,26 772,16 726,24 682,12 638,28 592,14 548,22 502,10 458,26 414,16 368,24 324,12 280,28 234,14 190,22 146,10 100,26 56,16 0,24" fill="#f7efe3"/>
+            <polygon points="0,0 1440,0 1440,14 1396,6 1352,20 1306,8 1262,18 1218,4 1172,20 1128,10 1084,18 1040,6 994,22 950,8 906,16 860,4 816,20 772,10 726,18 682,6 638,22 592,8 548,16 502,4 458,20 414,10 368,18 324,6 280,22 234,8 190,16 146,4 100,20 56,10 0,18" fill="#efe6da"/>
+        </svg>
+    </section>
+</main>
+
+<!-- Carousel: kartu tengah = aktif, kiri = sebelumnya, kanan = berikutnya -->
+<script>
+    (function () {
+        var root = document.querySelector('[data-carousel]');
+        if (!root) return;
+        var cards = Array.prototype.slice.call(root.querySelectorAll('[data-card]'));
+        var dotsBox = root.querySelector('[data-dots]');
+        var n = cards.length;
+        var idx = 0;
+
+        if (n <= 1) root.classList.add('is-single');
+
+        var dots = cards.map(function (_, i) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'carousel__dot';
+            b.setAttribute('aria-label', 'Go to project ' + (i + 1));
+            b.addEventListener('click', function () { go(i); });
+            dotsBox.appendChild(b);
+            return b;
+        });
+
+        function wrap(i) { return ((i % n) + n) % n; }
+
+        function go(i) {
+            idx = wrap(i);
+            cards.forEach(function (card, k) {
+                card.classList.remove('is-active', 'is-prev', 'is-next');
+                if (k === idx) card.classList.add('is-active');
+                else if (n > 2 && k === wrap(idx - 1)) card.classList.add('is-prev');
+                else if (k === wrap(idx + 1)) card.classList.add('is-next');
+            });
+            dots.forEach(function (d, k) {
+                d.classList.toggle('is-active', k === idx);
+                d.setAttribute('aria-current', k === idx ? 'true' : 'false');
+            });
+        }
+
+        root.querySelector('[data-prev]').addEventListener('click', function () { go(idx - 1); });
+        root.querySelector('[data-next]').addEventListener('click', function () { go(idx + 1); });
+        cards.forEach(function (card, k) {
+            card.querySelector('[data-focus]').addEventListener('click', function () { go(k); });
+        });
+
+        if (n) go(0);
+    })();
+</script>
 {% endblock content %}
