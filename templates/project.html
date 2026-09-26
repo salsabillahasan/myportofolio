@@ -65,8 +65,8 @@
 
                         <div class="pcard__frame">
                             <div class="pcard__mat">
-                                {% if project_image_src %}
-                                    <img class="pcard__image" src="{{ project_image_src }}" alt="Screenshot of {{ project.title }}">
+                                {% if project.image_src %}
+                                    <img class="pcard__image" src="{{ project.image_src }}" alt="Screenshot of {{ project.title }}">
                                 {% else %}
                                     <div class="pcard__image pcard__image--empty">
                                         <span class="label">Project Image</span>
