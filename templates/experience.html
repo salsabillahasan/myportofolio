@@ -8,7 +8,6 @@
 {% block content %}
 <main class="experience-page" id="experience">
 
-    <!-- ========== HEADER: roll film + koper + roll film ========== -->
     <section class="journey-header">
         <div class="film-strip film-strip--left">
             {% for photo in film_left %}
@@ -49,12 +48,10 @@
         </div>
     {% endif %}
 
-    <!-- ========== TIMELINE ========== -->
     <section class="timeline" aria-label="Experience timeline">
         {% for experience in experience_list %}
             <article class="timeline__row {% if forloop.counter|divisibleby:2 %}timeline__row--reverse{% endif %}">
 
-                <!-- Teks -->
                 <div class="timeline__text">
                     <p class="timeline__date label">
                         {{ experience.started_at|date:"M Y" }}
@@ -67,24 +64,21 @@
                     <h2 class="timeline__title">{{ experience.title }}</h2>
                     <p class="timeline__role">{{ experience.role }}</p>
                     <div class="timeline__desc">{{ experience.description|safe|linebreaksbr }}</div>
+                    
+                    <div class="timeline__actions">
+                        {% if user.is_superuser or is_editor %}
+                        <a href="{% url 'main:update_experience' experience.id %}" class="btn btn--burgundy">Edit</a>
+                        {% endif %}
 
-                    {% if user.is_superuser %}
-                        <div class="timeline__actions">
-                            <a href="{% url 'main:update_experience' experience.id %}" class="btn btn--burgundy">Edit</a>
-                            <form method="post"
-                                  action="{% url 'main:delete_experience' experience.id %}"
-                                  onsubmit="return confirm('Delete {{ experience.title|escapejs }}?');">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn--danger-outline">Delete</button>
-                            </form>
-                        </div>
-                    {% endif %}
+                        {% if user.is_superuser %}
+                            {% include "components/experience_delete_modal.html" with experience=experience %}   
+                        {% endif %}
+                    </div>
+
                 </div>
 
-                <!-- Titik di garis -->
                 <span class="timeline__node" aria-hidden="true"></span>
 
-                <!-- Foto berjepit -->
                 <div class="timeline__photo">
                     <figure class="polaroid">
                         <img class="polaroid__clip" src="{% static 'img/clip.png' %}" alt="">

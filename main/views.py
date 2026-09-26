@@ -49,6 +49,8 @@ def register(request):
     return render(request, "register.html", context)
 
 def show_experience(request):
+    is_editor = request.user.groups.filter(name="Editor").exists()
+
     experience_list = Experience.objects.order_by("-started_at")
 
     # 8 slot roll film: 4 di kiri, 4 di kanan (slot kosong = None)
@@ -61,6 +63,7 @@ def show_experience(request):
         "experience_list": experience_list,
         "film_left": film_photos[:4],
         "film_right": film_photos[4:],
+        "is_editor": is_editor,
     }
     return render(request, "experience.html", context)
 
@@ -86,9 +89,6 @@ def create_experience(request):
 
 @login_required(login_url="/login/")
 def update_experience(request, experience_id):
-    if not request.user.is_superuser:
-        raise PermissionDenied
-
     experience = get_object_or_404(Experience, pk=experience_id)
     form = ExperienceForm(request.POST or None, request.FILES or None, instance=experience)
 
@@ -97,11 +97,14 @@ def update_experience(request, experience_id):
         messages.success(request, "Experience successfully updated!")
         return redirect("main:show_experience")
 
+    is_editor = request.user.groups.filter(name="Editor").exists()
+
     context = {
         "name": "Salsabilla Hasan",
         "nickname": "Alsa",
         "form": form,
         "experience": experience,
+        "is_editor": is_editor,
     }
     return render(request, "experience_form.html", context)
 
@@ -164,15 +167,14 @@ def create_education(request):
     return render(request, "education_form.html", context)
 
 @login_required(login_url="/login/") 
-def update_education(request, education_id):
-    if not request.user.is_superuser:
-        raise PermissionDenied
-    
+def update_education(request, education_id):    
+    education = get_object_or_404(Education, pk=education_id)
     is_editor = request.user.groups.filter(name="Editor").exists()
 
-    education = get_object_or_404(Education, pk=education_id)
-
     form = EducationForm(request.POST or None, request.FILES or None, instance=education)
+
+    if not request.user.is_superuser and not is_editor:
+        raise PermissionDenied
 
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -184,6 +186,7 @@ def update_education(request, education_id):
         "nickname": "Alsa",
         "form": form,
         "education": education,
+        "is_editor": is_editor
     }
 
     return render(request, "education_form.html", context)
@@ -263,6 +266,7 @@ def update_project(request, project_id):
         "nickname": "Alsa",
         "form": form,
         "project": project,
+        "is_editor": is_editor
     }
 
     return render(request, "projects_form.html", context)

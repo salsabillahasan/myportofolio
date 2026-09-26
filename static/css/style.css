@@ -3239,3 +3239,42 @@ h1 {
     }
 }
 
+.project-delete-modal .project-delete-modal__actions .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 1.2rem;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.project-delete-modal .project-delete-modal__actions .button-secondary {
+    background: transparent;
+    border: 1px solid var(--burgundy);
+    color: var(--burgundy);
+}
+
+.project-delete-modal .project-delete-modal__actions .button-danger {
+    background: #a61b1b;
+    border: 1px solid #a61b1b;
+    color: #fff6f0;
+}
+
+.project-delete-modal .project-delete-modal__actions .button-danger:hover {
+    background: #86121b;
+}
+
+.project-delete-modal,
+.project-delete-modal__content {
+    text-align: left;
+}
+
+.project-delete-modal__actions {
+    justify-content: flex-end;
+}

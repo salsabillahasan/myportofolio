@@ -10,7 +10,6 @@
     <section class="education-page" id="education">
         <div class="education-layout">
 
-            <!-- Kolom kiri: judul + tombol tambah -->
             <div class="education-intro">
                 <h1 class="education-title">
                     Education
@@ -24,7 +23,6 @@
                 {% endif %}
             </div>
 
-            <!-- Kolom kanan: buku catatan -->
             <div class="notebook">
                 <div class="notebook__page">
 
@@ -56,22 +54,16 @@
                                     <p class="edu-entry__desc">{{ education.description }}</p>
                                 {% endif %}
 
+                                {% if user.is_superuser or is_editor %}
+                                <div class="edu-entry__actions">
+                                    <a href="{% url 'main:update_education' education.id %}"
+                                    class="btn btn--burgundy">
+                                    Edit
+                                </a>
+                                {% endif %}
+                                
                                 {% if user.is_superuser %}
-                                    <div class="edu-entry__actions">
-                                        <a href="{% url 'main:update_education' education.id %}"
-                                           class="btn btn--burgundy">
-                                            Edit
-                                        </a>
-
-                                        <form method="post"
-                                              action="{% url 'main:delete_education' education.id %}"
-                                              onsubmit="return confirm('Delete {{ education.institution|escapejs }}?');">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn--danger-outline">
-                                                Delete
-                                            </button>
-                                        </form>
-                                    </div>
+                                    {% include "components/education_delete_modal.html" with education=education %}     
                                 {% endif %}
                             </div>
                         </article>

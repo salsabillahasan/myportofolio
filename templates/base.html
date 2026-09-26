@@ -43,18 +43,5 @@
           <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
       </div>
   </footer>
-
-  <!-- Navbar sticky: tambah class "is-scrolled" saat halaman digulir -->
-  <script>
-      (function () {
-          var header = document.querySelector('.site-header');
-          if (!header) return;
-          function update() {
-              header.classList.toggle('is-scrolled', window.scrollY > 40);
-          }
-          window.addEventListener('scroll', update, { passive: true });
-          update();
-      })();
-  </script>
 </body>
 </html>
