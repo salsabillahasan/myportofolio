@@ -1,46 +1,92 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block meta %}
     <title>{% if experience %}Edit{% else %}Add{% endif %} Experience - {{ name }}</title>
 {% endblock meta %}
 
 {% block content %}
-    <main>
-        <section class="experience-section">
-            <div class="container">
-                <h1>
-                    {% if experience %}
-                        Edit Experience
-                    {% else %}
-                        Add Experience
-                    {% endif %}
-                </h1>
+<main class="letter-page">
 
-                <form method="post"
-                      enctype="multipart/form-data"
-                      action="{% if experience %}{% url 'main:update_experience' experience.id %}{% else %}{% url 'main:create_experience' %}{% endif %}"
-                      class="project-form">
+    <div class="letter-page__heading">
+        <h1 class="letter-page__title">
+            {% if experience %}
+                Edit Experience
+            {% else %}
+                Add Experience
+            {% endif %}</h1>
+    </div>
 
-                    {% csrf_token %}
+    <form method="post"
+          action="{% if experience %}{% url 'main:update_experience' experience.id %}{% else %}{% url 'main:create_experience' %}{% endif %}"
+          enctype="multipart/form-data"
+          class="letter-form">
+        {% csrf_token %}
 
-                    {% for field in form %}
-                        <div class="form-group">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% for error in field.errors %}
-                                <p class="form-error">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
+        <div class="envelope">
+            <div class="envelope__inside" aria-hidden="true"></div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="button">
-                            {% if experience %}Update Experience{% else %}Add Experience{% endif %}
-                        </button>
-                        <a href="{% url 'main:show_experience' %}" class="button button-secondary">Cancel</a>
+            <div class="letter">
+                <div class="letter__opening">
+                    <p class="letter__greeting">Dear Gallery,</p>
+                    <p class="letter__intro">
+                        {% if experience %}
+                            here's an update from one stop of my journey.
+                        {% else %}
+                            here's a new stop in my journey.
+                        {% endif %}</p>
+                </div>
+
+                {% for error in form.non_field_errors %}
+                    <p class="form-error" role="alert">{{ error }}</p>
+                {% endfor %}
+
+                {% for field in form %}
+                    <div class="letter-field letter-field--{{ field.widget_type }}{% if forloop.first %} letter-field--first{% endif %}{% if field.errors %} has-error{% endif %}">
+                        {% if field.widget_type == "clearablefile" or field.widget_type == "file" %}
+                        <label for="{{ field.id_for_label }}" class="label letter-field__label">{{ field.label }}</label>
+                        {% if field.value and field.value.url %}
+                            <div class="upload-box">
+                                <div class="upload-box__inner">
+                                    <img class="upload-box__preview" src="{{ field.value.url }}" alt="Current image">
+                                </div>
+                            </div>
+                            <label class="letter-field__clear">
+                                <input type="checkbox" name="{{ field.html_name }}-clear" id="{{ field.html_name }}-clear_id">
+                                Remove current image
+                            </label>
+                        {% endif %}
+                        <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" accept="image/*" class="file-input">
+                        {% else %}
+                        <label for="{{ field.id_for_label }}" class="label letter-field__label">{{ field.label }}</label>
+                        {{ field }}
+                        {% endif %}
+                        {% if field.help_text %}
+                            <div class="letter-field__help">{{ field.help_text|safe }}</div>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <p class="form-error" role="alert">{{ error }}</p>
+                        {% endfor %}
                     </div>
-                </form>
+                {% endfor %}
+
+                <p class="letter__signature">With love, Alsa</p>
             </div>
-        </section>
-    </main>
+
+            <svg class="envelope__pocket" viewBox="0 0 920 300" preserveAspectRatio="none" aria-hidden="true">
+                <polygon points="0,40 460,230 920,40 920,300 0,300" fill="#f4e8e2"/>
+                <polyline points="0,40 460,230 920,40" fill="none" stroke="#dcc7bd" stroke-width="1.5"/>
+                <line x1="0" y1="300" x2="380" y2="196" stroke="#e6d4cb" stroke-width="1.2"/>
+                <line x1="920" y1="300" x2="540" y2="196" stroke="#e6d4cb" stroke-width="1.2"/>
+            </svg>
+            <img class="envelope__seal" src="{% static 'img/seal.png' %}" alt="">
+        </div>
+
+        <div class="letter-actions">
+            <button type="submit" class="btn btn--gold">{% if experience %}Save Changes{% else %}Save to Journey{% endif %}</button>
+            <a href="{% url 'main:show_experience' %}" class="btn btn--outline-pill">Cancel</a>
+        </div>
+    </form>
+</main>
 {% endblock content %}
