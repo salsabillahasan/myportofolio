@@ -94,3 +94,13 @@ Dalam Individual Assignment 4, saya mempelajari cara menerapkan role editor pada
 Saya juga memahami cara membedakan hak akses Eeitor dengan pengguna biasa dan superuser, terutama bahwa editor hanya dapat mengubah data tanpa dapat membuat atau menghapus data. Selain itu, saya belajar bahwa pembatasan tersebut harus diperiksa di sisi server agar akses tetap aman meskipun pengguna mencoba menjalankan aksi secara langsung.
 
 Dengan bantuan AI sebagai teman belajar, saya dapat memahami konsep, mencari kesalahan pada implementasi, dan menyesuaikan kode dengan project yang saya kerjakan sendiri.
+
+## Redesign Portofolio
+
+Portofolio ini saya redesign dengan konsep galeri museum vintage. Saya ingin setiap pengunjung merasa seperti masuk ke sebuah museum.
+
+Konsep ini sudah lama saya rancang di Figma, mulai dari moodboard, referensi visual, sampai pemilihan elemen seperti bingkai oval, bintang emas, klip, segel lilin, dan roll film. Namun, untuk menuangkan desain tersebut ke dalam kode, saya membutuhkan bantuan. Karena itu, dalam proses redesign ini saya menggunakan AI (Claude dari Anthropic) sebagai partner kerja.
+
+Dengan AI, saya mengeksplorasi tata letak setiap section berdasarkan referensi dan arahan saya, lalu menerjemahkannya menjadi kode: menulis ulang style.css, menyesuaikan template HTML, hingga membantu menelusuri error saat deploy ke PWS. Sepanjang proses itu, saya tetap yang menentukan arah desain, memilih elemen, merevisi hasil yang belum sesuai, lalu mengintegrasikan, menguji di desktop maupun mobile, dan melakukan deploy.
+
+Saya menuliskan bagian ini karena ingin transparan tentang proses di balik website ini. Seluruh kode hasil bantuan AI sudah saya baca, sesuaikan dengan struktur project saya, dan uji sebelum di-commit. Bagi saya, proyek ini juga menjadi proses belajar: bagaimana sebuah desain di Figma bisa dihidupkan menjadi website yang benar-benar berjalan.
