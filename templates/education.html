@@ -1,99 +1,88 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block meta %}
     <title>Education - {{ name }}</title>
 {% endblock meta %}
+
 {% block content %}
-
 <main>
-        <section class="experience-section" id="experience">
-            <div class="container">
-                <section class="experience-header">
-                    <h1>Education</h1>
-                    <p>
-                        My academic journey and educational background.
-                    </p>
-                    {% if user.is_superuser %}
-                    <a href="{% url 'main:create_education' %}" class="button project-add-button education-add-button"> <span aria-hidden="true">+</span>Add Education</a>
-                    {% endif %}
-                </section>
+    <section class="education-page" id="education">
+        <div class="education-layout">
 
-                <div class="experience-grid">
+            <!-- Kolom kiri: judul + tombol tambah -->
+            <div class="education-intro">
+                <h1 class="education-title">
+                    Education
+                    <img class="education-title__stars" src="{% static 'img/stars.png' %}" alt="">
+                </h1>
 
-                {% for education in education_list %}
+                {% if user.is_superuser %}
+                    <a href="{% url 'main:create_education' %}" class="btn btn--gold">
+                        <span aria-hidden="true">+</span> Add Education
+                    </a>
+                {% endif %}
+            </div>
 
-                <article>
+            <!-- Kolom kanan: buku catatan -->
+            <div class="notebook">
+                <div class="notebook__page">
 
-                    <div class="experience-title">
-
-                        {% if education.thumbnail %}
-                        <img 
-                            src="{{ education.thumbnail }}"
-                            alt="{{ education.institution }} logo"
-                            class="experience-icon"
-                        >
-                        {% endif %}
-
-                        <h3>{{ education.institution }}</h3>
-
-                    </div>
-
-
-                    <p class="experience-role-title">
-                        {{ education.degree }}
-                    </p>
-
-
-                    <p class="experience-role-title">
-                        {{ education.field_of_study }}
-                    </p>
-
-
-                    <span class="experience-date">
-                        {{ education.started_at|date:"F Y" }}
-                        -
-                        {% if education.ended_at %}
-                            {{ education.ended_at|date:"F Y" }}
-                        {% else %}
-                            Present
-                        {% endif %}
-                    </span>
-
-
-                    <p>
-                        {{ education.description }}
-                    </p>
-                    <div class="education-actions">
-                        {% if user.is_superuser %}
-                        <a href="{% url 'main:update_education' education.id %}" 
-                        class="education-action edit-action">
-                            Edit
-                        </a>
-                        {% endif %}
-
-                        <form method="post"
-                            action="{% url 'main:delete_education' education.id %}"
-                            style="display: inline;">
-                            {% csrf_token %}
-
-                            {% if user.is_superuser %}
-                            <button type="submit" class="education-action delete-action">
-                                Delete
-                            </button>
+                    {% for education in education_list %}
+                        <article class="edu-entry">
+                            {% if education.logo_src %}
+                                <img class="edu-entry__logo"
+                                     src="{{ education.logo_src }}"
+                                     alt="{{ education.institution }} logo">
                             {% endif %}
-                        </form>
-                    </div>
 
+                            <div class="edu-entry__body">
+                                <p class="edu-entry__date label">
+                                    {{ education.started_at|date:"M Y" }} —
+                                    {% if education.ended_at %}
+                                        {{ education.ended_at|date:"M Y" }}
+                                    {% else %}
+                                        Present
+                                    {% endif %}
+                                </p>
 
-                </article>
+                                <h2 class="edu-entry__title">{{ education.institution }}</h2>
 
-                {% empty %}
+                                <p class="edu-entry__degree">
+                                    {{ education.degree }} &middot; {{ education.field_of_study }}
+                                </p>
 
-                <p>
-                    Belum ada pendidikan yang ditambahkan.
-                </p>
+                                {% if education.description %}
+                                    <p class="edu-entry__desc">{{ education.description }}</p>
+                                {% endif %}
 
-                {% endfor %}
+                                {% if user.is_superuser %}
+                                    <div class="edu-entry__actions">
+                                        <a href="{% url 'main:update_education' education.id %}"
+                                           class="btn btn--burgundy">
+                                            Edit
+                                        </a>
+
+                                        <form method="post"
+                                              action="{% url 'main:delete_education' education.id %}"
+                                              onsubmit="return confirm('Delete {{ education.institution|escapejs }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn--danger-outline">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% empty %}
+                        <p class="education-empty">No education added yet.</p>
+                    {% endfor %}
 
                 </div>
-    </main>
+            </div>
+
+        </div>
+    </section>
+</main>
 {% endblock content %}
