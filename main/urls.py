@@ -1,6 +1,23 @@
 from django.urls import path
 
-from main.views import delete_education, show_main, show_experience, show_education, show_projects, create_project, delete_project, create_education, update_education, delete_education, get_projects_json, get_education_json, register
+from main.views import (
+    delete_education, 
+    show_main, 
+    show_experience, 
+    show_education, 
+    show_projects, 
+    create_project, 
+    delete_project, 
+    create_education, 
+    toggle_star, 
+    update_education, 
+    delete_education, 
+    get_projects_json, 
+    get_education_json, 
+    register, 
+    login_user, 
+    logout_user
+)
 
 app_name = "main"
 
@@ -17,4 +34,7 @@ urlpatterns = [
     path("api/projects/", get_projects_json, name="get_projects_json"),
     path("api/education/", get_education_json, name="get_education_json"),
     path("register/", register, name="register"),
+    path("login/", login_user, name="login"),
+    path("logout/", logout_user, name="logout"),
+    path("projects/<uuid:project_id>/star/", toggle_star, name="toggle_star"),
 ]

@@ -93,6 +93,32 @@ h1, .brand {
     color: var(--accent);
 }
 
+.nav-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+
+    color: var(--white);
+    font-size: 0.95rem;
+    font-weight: 600;
+
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.08);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.nav-user-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
 /*Section Hero dengan CSS Grid */
 .hero {
     padding: 5rem 2rem 6rem;
@@ -748,6 +774,28 @@ h1, .brand {
 
 .form-actions .button {
     margin: 0;
+}
+
+.star-form {
+    display: inline;
+}
+
+.button-star {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--ink);
+}
+
+.button-star.is-starred {
+    background: var(--accent);
+}
+
+.star-count {
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+    font-size: 0.8rem;
 }
 
 @media (max-width: 600px) {
