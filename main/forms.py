@@ -1,6 +1,6 @@
 from django.forms import ModelForm, TextInput, Textarea, URLInput, DateInput
 
-from main.models import Project, Education
+from main.models import Project, Education, Experience
 
 class ProjectForm(ModelForm):
     class Meta:
@@ -109,11 +109,6 @@ class EducationForm(ModelForm):
                     "placeholder": "Tell us about your education experience",
                 }
             ),
-            "thumbnail": URLInput(
-                attrs={
-                    "placeholder": "YYYY-MM-DD",
-                }
-            ),
             "description": TextInput(
                 attrs={ 
                     "placeholder": "Tell us about your education experience",
@@ -125,3 +120,44 @@ class EducationForm(ModelForm):
                 }
             ),
         }
+
+class ExperienceForm(ModelForm):
+    class Meta:
+        model = Experience
+        fields = [
+            "title",
+            "role",
+            "category",
+            "started_at",
+            "ended_at",
+            "description",
+            "logo_image",
+            "thumbnail",
+            "photo_image",
+            "photo_url",
+        ]
+        labels = {
+            "title": "Organization / Event",
+            "role": "Role",
+            "category": "Category",
+            "started_at": "Start Date",
+            "ended_at": "End Date (leave empty if still ongoing)",
+            "description": "Description",
+            "logo_image": "Upload Logo",
+            "thumbnail": "…or Logo URL",
+            "photo_image": "Upload Activity Photo",
+            "photo_url": "…or Activity Photo URL",
+        }
+        widgets = {
+            "started_at": DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "ended_at": DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "description": Textarea(attrs={"rows": 5}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        start = cleaned.get("started_at")
+        end = cleaned.get("ended_at")
+        if start and end and end < start:
+            self.add_error("ended_at", "End date cannot be earlier than start date.")
+        return cleaned

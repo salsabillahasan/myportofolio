@@ -9,7 +9,7 @@ from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from main.models import Experience, Education, Project
-from main.forms import ProjectForm, EducationForm
+from main.forms import ProjectForm, EducationForm, ExperienceForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
@@ -17,14 +17,14 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 def show_main(request):
     last_login = request.COOKIES.get(
         "last_login",
-        "Belum ada sesi login / Cookie tidak ditemukan"
+        "No login session yet / Cookie not found"
     )
 
     context = {
         "name": "Salsabilla Hasan",
         "nickname": "Alsa",
         "npm": "2506548660",
-        "study_program": "S1 Sistem Informasi",
+        "study_program": "Information Systems",
         "bio": (
             "Information Systems student at Universitas Indonesia who enjoys exploring product management, technology, and creative problem-solving. I’m interested in understanding what people need, turning ideas into useful products, and learning how technology can create meaningful experiences."
         ),
@@ -49,12 +49,75 @@ def register(request):
     return render(request, "register.html", context)
 
 def show_experience(request):
+    experience_list = Experience.objects.order_by("-started_at")
+
+    # 8 slot roll film: 4 di kiri, 4 di kanan (slot kosong = None)
+    film_photos = [e.photo_src for e in experience_list if e.photo_src][:8]
+    film_photos += [None] * (8 - len(film_photos))
+
     context = {
         "name": "Salsabilla Hasan",
         "nickname": "Alsa",
-        "experience_list": Experience.objects.all(),
+        "experience_list": experience_list,
+        "film_left": film_photos[:4],
+        "film_right": film_photos[4:],
     }
     return render(request, "experience.html", context)
+
+@login_required(login_url="/login/")
+def create_experience(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    form = ExperienceForm(request.POST or None, request.FILES or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Experience successfully added!")
+        return redirect("main:show_experience")
+
+    context = {
+        "name": "Salsabilla Hasan",
+        "nickname": "Alsa",
+        "form": form,
+    }
+    return render(request, "experience_form.html", context)
+
+
+@login_required(login_url="/login/")
+def update_experience(request, experience_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    experience = get_object_or_404(Experience, pk=experience_id)
+    form = ExperienceForm(request.POST or None, request.FILES or None, instance=experience)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Experience successfully updated!")
+        return redirect("main:show_experience")
+
+    context = {
+        "name": "Salsabilla Hasan",
+        "nickname": "Alsa",
+        "form": form,
+        "experience": experience,
+    }
+    return render(request, "experience_form.html", context)
+
+
+@login_required(login_url="/login/")
+def delete_experience(request, experience_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    experience = get_object_or_404(Experience, pk=experience_id)
+
+    if request.method == "POST":
+        experience.delete()
+        messages.success(request, "Experience successfully deleted!")
+
+    return redirect("main:show_experience")
 
 def show_education(request):
     json_response = get_education_json(request)
@@ -85,7 +148,7 @@ def create_education(request):
     if not request.user.is_superuser:
         raise PermissionDenied
 
-    form = EducationForm(request.POST or None)
+    form = EducationForm(request.POST or None, request.FILES or None)
 
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -109,7 +172,7 @@ def update_education(request, education_id):
 
     education = get_object_or_404(Education, pk=education_id)
 
-    form = EducationForm(request.POST or None, instance=education)
+    form = EducationForm(request.POST or None, request.FILES or None, instance=education)
 
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -165,7 +228,7 @@ def create_project(request):
     if not request.user.is_superuser:
         raise PermissionDenied
     
-    form = ProjectForm(request.POST or None)
+    form = ProjectForm(request.POST or None, request.FILES or None)
 
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -188,7 +251,7 @@ def update_project(request, project_id):
     if not request.user.is_superuser and not is_editor:
         raise PermissionDenied
 
-    form = ProjectForm(request.POST or None, instance=project)
+    form = ProjectForm(request.POST or None, request.FILES or None,instance=project)
 
     if request.method == "POST" and form.is_valid():
         form.save()

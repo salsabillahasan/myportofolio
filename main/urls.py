@@ -1,4 +1,7 @@
 from django.urls import path
+from django.conf import settings
+from django.urls import re_path
+from django.views.static import serve
 
 from main.views import (
     delete_education, 
@@ -18,6 +21,9 @@ from main.views import (
     login_user, 
     logout_user,
     update_project,
+    create_experience,
+    update_experience,
+    delete_experience,
 )
 
 app_name = "main"
@@ -39,5 +45,8 @@ urlpatterns = [
     path("logout/", logout_user, name="logout"),
     path("projects/<uuid:project_id>/star/", toggle_star, name="toggle_star"),
     path("projects/<uuid:project_id>/edit/", update_project, name="update_project"),
-
+    path("experience/add/", create_experience, name="create_experience"),
+    path("experience/<uuid:experience_id>/edit/", update_experience, name="update_experience"),
+    path("experience/<uuid:experience_id>/delete/", delete_experience, name="delete_experience"),
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
 ]
