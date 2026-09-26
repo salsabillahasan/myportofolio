@@ -11,6 +11,7 @@ class ProjectForm(ModelForm):
             "tech_stack",
             "project_url",
             "project_image_url",
+            "project_image",
         ]
 
         labels = {
@@ -18,6 +19,7 @@ class ProjectForm(ModelForm):
             "description": "Description",
             "tech_stack": "Tech Stack",
             "project_url": "Project URL",
+            "project_image": "Upload Project Image",
             "project_image_url": "Project Image URL",
         }
 

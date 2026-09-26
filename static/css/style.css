@@ -1257,6 +1257,13 @@ textarea:focus-visible {
     overflow: hidden;
 }
 
+/* Kartu tengah: deskripsi tampil lengkap */
+.pcard.is-active .pcard__desc {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+}
+
 .pcard__tags {
     list-style: none;
     display: flex;
