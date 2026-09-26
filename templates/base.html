@@ -12,29 +12,35 @@
 </head>
 
 <body>
-  {% with page=request.resolver_match.url_name %}
-  <header class="site-header">
-    <div class="container">
-        <a href="{% url 'main:show_main' %}" class="brand">{{ nickname }}'s Portfolio</a>
-        <nav aria-label="Main navigation">
-            <a href="{% url 'main:show_main' %}" {% if page == 'show_main' %}aria-current="page"{% endif %}>Profile</a>
-            <a href="{% url 'main:show_experience' %}" {% if page == 'show_experience' %}aria-current="page"{% endif %}>Experience</a>
-            <a href="{% url 'main:show_education' %}" {% if page == 'show_education' %}aria-current="page"{% endif %}>Education</a>
-            <a href="{% url 'main:show_projects' %}" {% if page == 'show_projects' %}aria-current="page"{% endif %}>Projects</a>
-            {% if user.is_authenticated %}
-                <span class="nav-user">
-                    <span class="nav-user-icon" aria-hidden="true">♡</span>
-                    {{ user.username }}
-                </span>
-                <a href="{% url 'main:logout' %}">Logout</a>
-            {% else %}
-                <a href="{% url 'main:login' %}" {% if page == 'login' %}aria-current="page"{% endif %}>Login</a>
-                <a href="{% url 'main:register' %}" class="nav-cta">Register</a>
-            {% endif %}
-        </nav>
-    </div>
-  </header>
-  {% endwith %}
+{% with page=request.resolver_match.url_name %}
+<header class="site-header">
+  <div class="container">
+      <a href="{% url 'main:show_main' %}" class="brand">{{ nickname }}'s Portfolio</a>
+
+      <button type="button" class="nav-user" popovertarget="nav-menu">
+          <span class="nav-user-icon" aria-hidden="true">♡</span>
+          <span class="nav-user-name">{% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %}</span>
+          <span class="nav-user-caret" aria-hidden="true">▾</span>
+      </button>
+
+      <nav id="nav-menu" class="nav-menu" popover aria-label="Main navigation">
+          <a href="{% url 'main:show_main' %}" {% if page == 'show_main' %}aria-current="page"{% endif %}>Profile</a>
+          <a href="{% url 'main:show_experience' %}" {% if page == 'show_experience' %}aria-current="page"{% endif %}>Experience</a>
+          <a href="{% url 'main:show_education' %}" {% if page == 'show_education' %}aria-current="page"{% endif %}>Education</a>
+          <a href="{% url 'main:show_projects' %}" {% if page == 'show_projects' %}aria-current="page"{% endif %}>Projects</a>
+
+          <hr class="nav-menu__divider">
+
+          {% if user.is_authenticated %}
+              <a href="{% url 'main:logout' %}">Logout</a>
+          {% else %}
+              <a href="{% url 'main:login' %}" {% if page == 'login' %}aria-current="page"{% endif %}>Login</a>
+              <a href="{% url 'main:register' %}" class="nav-cta">Register</a>
+          {% endif %}
+      </nav>
+  </div>
+</header>
+{% endwith %}
 
   {% block content %} {% endblock content %}
 
