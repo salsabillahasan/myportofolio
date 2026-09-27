@@ -380,14 +380,9 @@ textarea:focus-visible {
     line-height: 2rem;
     font-style: italic;
     color: var(--on-dark);
+    margin-bottom: 5.5rem;
 }
 
-.hero-ornament {
-    display: block;
-    width: min(360px, 80%);
-    height: auto;
-    margin: 3.5rem auto 7.5rem;
-}
 
 /* =========================================================
    7. PROFILE — tiket masuk galeri
@@ -665,7 +660,7 @@ textarea:focus-visible {
         right: 1rem;
         width: min(260px, calc(100% - 2rem));
     }
-    
+
     .hero-name {
         flex-direction: column;
     }
@@ -2649,6 +2644,7 @@ h1 {
 
 .button:hover {
     background-color: var(--accent);
+    color: var(--paper);
 }
 
 .button {
