@@ -2,7 +2,12 @@
 {% load static %}
 
 {% block meta %}
-    <title>{% if project %}Edit{% else %}Add{% endif %} Project - {{ name }}</title>
+    <title>{% if project %}
+                Edit
+            {% else %}
+                Add
+            {% endif %} Project - {{ name }}
+    </title>
 {% endblock meta %}
 
 {% block content %}
