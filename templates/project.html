@@ -18,7 +18,7 @@
         </div>
 
         <div class="projects-tools">
-            <form method="get" action="{% url 'main:show_projects' %}" class="project-search-box" role="search">
+            <form id="project-search-form" class="project-search-box" role="search">
                 <label for="project-search" class="label">Search works</label>
                 <div class="project-search-box__row">
                     <input type="search" id="project-search" name="title"
@@ -36,9 +36,9 @@
                     <div class="envelope-card__text">
                         <p class="label">Next Collection</p>
                         <p class="envelope-card__note">This envelope awaits a new work.</p>
-                        <a href="{% url 'main:create_project' %}" class="btn btn--gold">
+                        <button type="button" class="btn btn--gold" popovertarget="add-project-modal">
                             <span aria-hidden="true">+</span> Add Project
-                        </a>
+                        </button>
                     </div>
                 </div>
             {% endif %}
@@ -50,75 +50,22 @@
             <polygon points="0,0 1440,0 1440,18 1400,26 1362,14 1318,24 1270,12 1228,28 1180,16 1140,24 1096,10 1050,26 1004,14 960,22 918,12 872,28 826,16 782,24 740,10 694,26 650,14 604,22 560,12 516,28 470,16 428,24 384,12 340,26 296,14 252,24 206,10 162,26 118,16 74,24 36,12 0,22" fill="#f7efe3"/>
             <polygon points="0,0 1440,0 1440,12 1400,20 1362,8 1318,18 1270,6 1228,22 1180,10 1140,18 1096,4 1050,20 1004,8 960,16 918,6 872,22 826,10 782,18 740,4 694,20 650,8 604,16 560,6 516,22 470,10 428,18 384,6 340,20 296,8 252,18 206,4 162,20 118,10 74,18 36,6 0,16" fill="#efe6da"/>
         </svg>
+        
+        <!-- Loading State -->
+        <p id="loading" class="projects-empty hide">Loading projects...</p>
 
-        <div class="carousel" data-carousel>
+        <!-- Error State -->
+        <p id="error" class="projects-empty hide">Failed to load projects. Please try again.</p>
+
+        <!-- Empty State -->
+        <p id="empty" class="projects-empty hide">No projects added yet.</p>
+
+        <div class="carousel hide" data-carousel>
             <button type="button" class="carousel__arrow carousel__arrow--prev" data-prev aria-label="Previous project">
                 <svg viewBox="0 0 22 22" aria-hidden="true"><path d="M15 3 L5 11 L15 19 Z"/></svg>
             </button>
 
-            <div class="carousel__track">
-                {% for project in project_list %}
-                    <article class="pcard" data-card>
-                        <img class="pcard__clip" src="{% static 'img/clip.png' %}" alt="">
-
-                        <div class="pcard__frame">
-                            <div class="pcard__mat">
-                                {% if project.image_src %}
-                                    <img class="pcard__image" src="{{ project.image_src }}" alt="Screenshot of {{ project.title }}">
-                                {% else %}
-                                    <div class="pcard__image pcard__image--empty">
-                                        <span class="label">Project Image</span>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="pcard__body">
-                            <div class="pcard__meta">
-                                <span class="pcard__badge">Collection No. {{ forloop.counter|stringformat:"02d" }}</span>
-                                <span class="pcard__stars">&#9734; {{ project.starred_by.count }} stars</span>
-                            </div>
-
-                            <h2 class="pcard__title">{{ project.title }}</h2>
-                            <p class="pcard__desc">{{ project.description }}</p>
-
-                            <ul class="pcard__tags" aria-label="Tech stack">
-                                {% for tech in project.tech_list %}
-                                    <li>{{ tech }}</li>
-                                {% endfor %}
-                            </ul>
-
-                            <button type="button" class="btn pcard__focus" data-focus>See Details</button>
-
-                            <div class="pcard__main-actions">
-                                {% if project.project_url %}
-                                    <a href="{{ project.project_url }}" class="btn btn--burgundy pcard__cta" target="_blank" rel="noopener">See Details</a>
-                                {% endif %}
-
-                                <div class="pcard__row">
-                                    {% include "components/project_star.html" with project=project %}
-
-                                    {% if user.is_superuser or is_editor %}
-                                        <a href="{% url 'main:update_project' project.id %}" class="btn btn--outline">Edit</a>
-                                    {% endif %}
-
-                                    {% if user.is_superuser %}
-                                        {% include "components/project_delete_modal.html" with project=project %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                {% empty %}
-                    <p class="projects-empty">
-                        {% if title_query %}
-                            No project found with that name.
-                        {% else %}
-                            No projects added yet.
-                        {% endif %}
-                    </p>
-                {% endfor %}
-            </div>
+            <div class="carousel__track" id="project-track"></div>
 
             <button type="button" class="carousel__arrow carousel__arrow--next" data-next aria-label="Next project">
                 <svg viewBox="0 0 22 22" aria-hidden="true"><path d="M7 3 L17 11 L7 19 Z"/></svg>
@@ -134,20 +81,173 @@
     </section>
 </main>
 
-<!-- pembuatan carousel dengan javascript dibantu oleh genAI -->
+{% if user.is_superuser %}
+    {% include "components/project_form_modal.html" %}
+{% endif %}
+
 <script>
-    (function () {
-        var root = document.querySelector('[data-carousel]');
-        if (!root) return;
-        var cards = Array.prototype.slice.call(root.querySelectorAll('[data-card]'));
-        var dotsBox = root.querySelector('[data-dots]');
-        var n = cards.length;
-        var idx = 0;
+    // Konfigurasi 
+    const BASE_PROJECTS_ENDPOINT = "{% url 'main:get_projects_json' %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
+    const CLIP_IMG = "{% static 'img/clip.png' %}";
 
-        if (n <= 1) root.classList.add('is-single');
+    // Dummy UUID digunakan untuk digantikan oleh ID asli dari data JSON
+    const DUMMY_ID = "00000000-0000-0000-0000-000000000000";
+    const STAR_URL = "{% url 'main:toggle_star' '00000000-0000-0000-0000-000000000000' %}";
+    const EDIT_URL = "{% url 'main:update_project' '00000000-0000-0000-0000-000000000000' %}";
+    const DELETE_URL = "{% url 'main:delete_project' '00000000-0000-0000-0000-000000000000' %}";
 
-        var dots = cards.map(function (_, i) {
-            var b = document.createElement('button');
+    let projectsAbortController;
+
+    // Elemen DOM
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const carouselRoot = document.querySelector('[data-carousel]');
+    const track = document.getElementById('project-track');
+    const dotsBox = carouselRoot.querySelector('[data-dots]');
+    const searchForm = document.getElementById('project-search-form');
+    const searchInput = document.getElementById('project-search');
+
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let searchDebounceTimer;
+
+    // Menyembunyikan/Menampilkan section halaman
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        carouselRoot.classList.toggle('hide', !showGrid);
+    }
+
+    // Mengubah karakter khusus HTML menjadi entity agar ditampilkan sebagai teks
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    // Membuat elemen kartu proyek 
+    function buildProjectCardElement(item, index) {
+        const project = item.fields;
+        const projectId = item.pk;
+
+        const article = document.createElement('article');
+        article.className = 'pcard';
+        article.setAttribute('data-card', '');
+
+        const number = String(index + 1).padStart(2, '0');
+
+        const imageHtml = project.image_src
+            ? `<img class="pcard__image" src="${escapeHtml(project.image_src)}" alt="Screenshot of ${escapeHtml(project.title)}">`
+            : `<div class="pcard__image pcard__image--empty"><span class="label">Project Image</span></div>`;
+
+        const tagsHtml = project.tech_list.map(tech => `<li>${escapeHtml(tech)}</li>`).join('');
+
+        const urlHtml = project.project_url
+            ? `<a href="${escapeHtml(project.project_url)}" class="btn btn--burgundy pcard__cta" target="_blank" rel="noopener">See Details</a>`
+            : '';
+
+        // Tombol star (meniru components/project_star.html)
+        const starUrl = STAR_URL.replace(DUMMY_ID, projectId);
+        const isStarredClass = project.is_starred ? ' is-starred' : '';
+        const starText = project.is_starred ? 'Unstar' : 'Star';
+        const starTitle = project.star_count > 0
+            ? `Dibintangi oleh ${escapeHtml(project.starred_by_names)}`
+            : 'Jadilah yang pertama memberi star';
+
+        const starHtml = `
+            <form method="post" action="${starUrl}" class="star-form">
+                {% csrf_token %}
+                <button type="submit" class="button button-star${isStarredClass}" title="${starTitle}">
+                    <span aria-hidden="true">★</span>
+                    ${starText}
+                    <span class="star-count">${project.star_count}</span>
+                </button>
+            </form>`;
+
+        const editHtml = (IS_SUPERUSER || IS_EDITOR)
+            ? `<a href="${EDIT_URL.replace(DUMMY_ID, projectId)}" class="btn btn--outline">Edit</a>`
+            : '';
+
+        const deleteHtml = IS_SUPERUSER
+            ? `<form method="post" action="${DELETE_URL.replace(DUMMY_ID, projectId)}" style="display:inline;">
+                   {% csrf_token %}
+                   <button type="submit" class="btn btn--danger-outline"
+                           onclick="return confirm('Yakin ingin menghapus project ini?');">Delete</button>
+               </form>`
+            : '';
+
+        article.innerHTML = `
+            <img class="pcard__clip" src="${CLIP_IMG}" alt="">
+
+            <div class="pcard__frame">
+                <div class="pcard__mat">${imageHtml}</div>
+            </div>
+
+            <div class="pcard__body">
+                <div class="pcard__meta">
+                    <span class="pcard__badge">Collection No. ${number}</span>
+                    <span class="pcard__stars">&#9734; ${project.star_count} stars</span>
+                </div>
+
+                <h2 class="pcard__title">${escapeHtml(project.title)}</h2>
+                <p class="pcard__desc">${escapeHtml(project.description)}</p>
+
+                <ul class="pcard__tags" aria-label="Tech stack">${tagsHtml}</ul>
+
+                <button type="button" class="btn pcard__focus" data-focus>See Details</button>
+
+                <div class="pcard__main-actions">
+                    ${urlHtml}
+                    <div class="pcard__row">
+                        ${starHtml}
+                        ${editHtml}
+                        ${deleteHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+        return article;
+    }
+
+    // Carousel
+    let cards = [];
+    let dots = [];
+    let idx = 0;
+
+    function wrap(i) {
+        const n = cards.length;
+        return ((i % n) + n) % n;
+    }
+
+    function go(i) {
+        const n = cards.length;
+        if (!n) return;
+        idx = wrap(i);
+        cards.forEach(function (card, k) {
+            card.classList.remove('is-active', 'is-prev', 'is-next');
+            if (k === idx) card.classList.add('is-active');
+            else if (n > 2 && k === wrap(idx - 1)) card.classList.add('is-prev');
+            else if (k === wrap(idx + 1)) card.classList.add('is-next');
+        });
+        dots.forEach(function (d, k) {
+            d.classList.toggle('is-active', k === idx);
+            d.setAttribute('aria-current', k === idx ? 'true' : 'false');
+        });
+    }
+
+    function setupCarousel() {
+        cards = Array.from(track.querySelectorAll('[data-card]'));
+        dotsBox.innerHTML = '';
+        carouselRoot.classList.toggle('is-single', cards.length <= 1);
+
+        dots = cards.map(function (_, i) {
+            const b = document.createElement('button');
             b.type = 'button';
             b.className = 'carousel__dot';
             b.setAttribute('aria-label', 'Go to project ' + (i + 1));
@@ -156,29 +256,140 @@
             return b;
         });
 
-        function wrap(i) { return ((i % n) + n) % n; }
-
-        function go(i) {
-            idx = wrap(i);
-            cards.forEach(function (card, k) {
-                card.classList.remove('is-active', 'is-prev', 'is-next');
-                if (k === idx) card.classList.add('is-active');
-                else if (n > 2 && k === wrap(idx - 1)) card.classList.add('is-prev');
-                else if (k === wrap(idx + 1)) card.classList.add('is-next');
-            });
-            dots.forEach(function (d, k) {
-                d.classList.toggle('is-active', k === idx);
-                d.setAttribute('aria-current', k === idx ? 'true' : 'false');
-            });
-        }
-
-        root.querySelector('[data-prev]').addEventListener('click', function () { go(idx - 1); });
-        root.querySelector('[data-next]').addEventListener('click', function () { go(idx + 1); });
         cards.forEach(function (card, k) {
             card.querySelector('[data-focus]').addEventListener('click', function () { go(k); });
         });
 
-        if (n) go(0);
-    })();
+        go(0);
+    }
+
+    // Tombol panah cukup dipasang SEKALI
+    carouselRoot.querySelector('[data-prev]').addEventListener('click', function () { go(idx - 1); });
+    carouselRoot.querySelector('[data-next]').addEventListener('click', function () { go(idx + 1); });
+
+    // Fetch data proyek
+    async function fetchProjects(searchQuery = "") {
+        if (projectsAbortController) projectsAbortController.abort();
+        projectsAbortController = new AbortController();
+
+        try {
+            displayPageSection({ showLoading: true });
+
+            const url = searchQuery
+                ? `${BASE_PROJECTS_ENDPOINT}?title=${encodeURIComponent(searchQuery)}`
+                : BASE_PROJECTS_ENDPOINT;
+
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: projectsAbortController.signal,
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const projectData = await response.json();
+
+            if (projectData.length === 0) {
+                emptyState.textContent = searchQuery
+                    ? 'No project found with that name.'
+                    : 'No projects added yet.';
+                displayPageSection({ showEmpty: true });
+            } else {
+                track.innerHTML = '';
+                projectData.forEach((item, index) => {
+                    track.appendChild(buildProjectCardElement(item, index));
+                });
+                displayPageSection({ showGrid: true });
+                setupCarousel();
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error('Error loading projects:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    // Event handler pencarian (dengan debouncing)
+    function searchProjects() {
+        fetchProjects(searchInput.value.trim());
+    }
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(function () {
+            searchProjects();
+        }, SEARCH_DEBOUNCE_DELAY);
+    });
+
+    searchForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        searchProjects();
+    });
+    
+    function closeProjectModal() {
+        document.getElementById('add-project-modal').hidePopover();
+    }
+
+    // Tambah proyek dengan AJAX
+    const CREATE_PROJECT_ENDPOINT = "{% url 'main:create_project_ajax' %}";
+    const projectForm = document.getElementById('project-form');
+
+    // Membaca nilai cookie, digunakan untuk mengambil token CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Mengirim data form ke server
+    async function addProject(event) {
+        event.preventDefault();
+
+        const submitButton = projectForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(CREATE_PROJECT_ENDPOINT, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: new FormData(projectForm),
+            });
+
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                projectForm.reset();
+                closeProjectModal();
+                showToast('Berhasil', 'Proyek baru berhasil ditambahkan!', 'success');
+                fetchProjects(searchInput.value.trim());
+            } else {
+                const errorMessages = result.errors
+                    ? Object.values(result.errors).flat().map(error => error.message)
+                    : [result.message || `Terjadi kesalahan (status ${response.status}).`];
+                showToast('Gagal menambahkan proyek', errorMessages.join(' '), 'error');
+            }
+        } catch (error) {
+            console.error('Error adding project:', error);
+            showToast('Gagal menambahkan proyek', 'Tidak dapat terhubung ke server. Silakan coba lagi.', 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (projectForm) {
+        projectForm.addEventListener('submit', addProject);
+    }
+
+    // Start application
+    fetchProjects(searchInput.value.trim());
 </script>
 {% endblock content %}

@@ -1,0 +1,50 @@
+<div id="add-project-modal"
+     class="project-form-modal"
+     popover="auto"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="add-project-modal-title">
+
+    <button type="button"
+            class="project-form-modal__backdrop"
+            popovertarget="add-project-modal"
+            popovertargetaction="hide"
+            aria-label="Close add project form"></button>
+
+    <div class="project-form-modal__content">
+        <button type="button"
+                class="project-form-modal__close"
+                popovertarget="add-project-modal"
+                popovertargetaction="hide"
+                aria-label="Close add project form">×</button>
+
+        <p class="label">Next Collection</p>
+        <h2 id="add-project-modal-title">Add New Project</h2>
+
+        <form id="project-form"
+              method="post"
+              action="{% url 'main:create_project' %}"
+              enctype="multipart/form-data"
+              class="project-form">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="letter-field{% if forloop.first %} letter-field--first{% endif %}">
+                    <label for="{{ field.id_for_label }}" class="label letter-field__label">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="project-form-modal__actions">
+                <button type="button"
+                        class="btn btn--outline"
+                        popovertarget="add-project-modal"
+                        popovertargetaction="hide">Cancel</button>
+                <button type="submit" class="btn btn--gold">Add Project</button>
+            </div>
+        </form>
+    </div>
+</div>
