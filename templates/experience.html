@@ -36,7 +36,7 @@
 
     {% if user.is_superuser %}
         <div class="journey-add">
-            <a href="{% url 'main:create_experience' %}" class="btn btn--gold">
+            <button type="button" class="btn btn--gold" popovertarget="add-experience-modal">
                 <span aria-hidden="true">+</span> Add Experience
             </a>
         </div>
@@ -70,6 +70,7 @@
 </main>
 
 {% if user.is_superuser %}
+    {% include "components/experience_form_modal.html" %}
     <div id="delete-experience-modal"
          class="project-delete-modal"
          popover="auto"
@@ -178,6 +179,11 @@
         document.getElementById('delete-experience-modal').showPopover();
     }
 
+    // Menutup modal tambah experience (dipakai setelah data berhasil disimpan).
+    function closeExperienceModal() {
+        document.getElementById('add-experience-modal').hidePopover();
+    }
+    
     // Merakit satu baris timeline dari satu objek JSON experience.
     function buildExperienceRowElement(item, index) {
         const experience = item.fields;

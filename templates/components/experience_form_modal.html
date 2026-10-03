@@ -1,0 +1,62 @@
+<div id="add-experience-modal"
+     class="project-form-modal"
+     popover="auto"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="add-experience-modal-title">
+
+    <button type="button"
+            class="project-form-modal__backdrop"
+            popovertarget="add-experience-modal"
+            popovertargetaction="hide"
+            aria-label="Close add experience form"></button>
+
+    <div class="project-form-modal__content">
+        <button type="button"
+                class="project-form-modal__close"
+                popovertarget="add-experience-modal"
+                popovertargetaction="hide"
+                aria-label="Close add experience form">×</button>
+
+        <p class="label">A New Stop</p>
+        <h2 id="add-experience-modal-title">Add Experience</h2>
+        <p class="letter__greeting">Dear Gallery,</p>
+        <p class="letter__intro">here's a new stop in my journey.</p>
+
+        <form id="experience-form"
+              method="post"
+              action="{% url 'main:create_experience' %}"
+              enctype="multipart/form-data"
+              class="project-form">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="letter-field letter-field--{{ field.widget_type }}{% if forloop.first %} letter-field--first{% endif %}">
+                    <label for="{{ field.id_for_label }}" class="label letter-field__label">{{ field.label }}</label>
+
+                    {% if field.widget_type == "clearablefile" or field.widget_type == "file" %}
+                        <input type="file"
+                               name="{{ field.html_name }}"
+                               id="{{ field.id_for_label }}"
+                               accept="image/*"
+                               class="file-input">
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+
+                    {% if field.help_text %}
+                        <div class="letter-field__help">{{ field.help_text|safe }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="project-form-modal__actions">
+                <button type="button"
+                        class="btn btn--outline"
+                        popovertarget="add-experience-modal"
+                        popovertargetaction="hide">Cancel</button>
+                <button type="submit" class="btn btn--gold">Save to Journey</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -57,6 +57,7 @@ def show_experience(request):
         "name": "Salsabilla Hasan",
         "nickname": "Alsa",
         "is_editor": is_editor,
+        "form": ExperienceForm(),
     }
     return render(request, "experience.html", context)
 
