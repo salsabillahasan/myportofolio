@@ -13,6 +13,7 @@ from main.forms import ProjectForm, EducationForm, ExperienceForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.views.decorators.http import require_POST
+from django.db.models import Q
 
 
 def show_main(request):
@@ -62,6 +63,13 @@ def show_experience(request):
 def get_experience_json(request):
     search_query = request.GET.get("q", "").strip()
     experiences = Experience.objects.prefetch_related("starred_by").order_by("-started_at")
+    search_query = request.GET.get("q", "").strip()
+    experiences = Experience.objects.prefetch_related("starred_by").order_by("-started_at")
+
+    if search_query:
+        experiences = experiences.filter(
+            Q(title__icontains=search_query) | Q(role__icontains=search_query)
+        )
 
     data = []
     for experience in experiences:

@@ -42,6 +42,20 @@
         </div>
     {% endif %}
 
+    <div class="journey-search">
+        <form id="experience-search-form" class="project-search-box" role="search">
+            <label for="experience-search" class="label">Search the journey</label>
+            <div class="project-search-box__row">
+                <input type="search"
+                       id="experience-search"
+                       name="q"
+                       placeholder="Organization or role"
+                       autocomplete="off">
+                <button type="submit" class="btn btn--burgundy">Search</button>
+            </div>
+        </form>
+    </div>
+
     <!-- Loading State -->
     <p id="experience-loading" class="timeline__empty hide">Loading the journey...</p>
 
@@ -99,6 +113,7 @@
     const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
     const CLIP_IMG = "{% static 'img/clip.png' %}";
     const FILM_SLOTS_PER_STRIP = 4;
+    const SEARCH_DEBOUNCE_DELAY = 300; 
 
     // Dummy UUID akan diganti dengan ID asli dari data JSON
     const DUMMY_ID = "00000000-0000-0000-0000-000000000000";
@@ -107,6 +122,7 @@
     const DELETE_URL = "{% url 'main:delete_experience' '00000000-0000-0000-0000-000000000000' %}";
 
     let experienceAbortController;
+    let searchDebounceTimer;
 
     // Elemen DOM
     const loadingState = document.getElementById('experience-loading');
@@ -114,6 +130,8 @@
     const emptyState = document.getElementById('experience-empty');
     const timeline = document.getElementById('experience-timeline');
     const filmStrips = document.querySelectorAll('.film-strip');
+    const searchForm = document.getElementById('experience-search-form');
+    const searchInput = document.getElementById('experience-search');
 
     // Menampilkan satu bagian halaman dan menyembunyikan sisanya.
     function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showTimeline = false }) {
@@ -281,6 +299,25 @@
             displayPageSection({ showError: true });
         }
     }
+
+    // Pencarian (dengan debouncing)
+    // Menjalankan pencarian berdasarkan isi kolom search.
+    function searchExperiences() {
+        fetchExperiences(searchInput.value.trim());
+    }
+
+    // saat mengetik tunggu sampai pengguna berhenti mengetik, baru cari
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(searchExperiences, SEARCH_DEBOUNCE_DELAY);
+    });
+
+    // saat menekan enter / tombol search, batalkan timer, langsung cari
+    searchForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        searchExperiences();
+    });
 
     // Start application
     fetchExperiences();

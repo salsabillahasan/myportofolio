@@ -3483,3 +3483,9 @@ h1 {
 .timeline__desc {
     white-space: pre-line;
 }
+
+/* Kotak pencarian di halaman Experience */
+.journey-search {
+    width: min(100% - 2rem, 640px);
+    margin: 2rem auto 0;
+}
