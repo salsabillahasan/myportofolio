@@ -4,6 +4,9 @@ from django.utils.html import strip_tags
 
 from main.models import Project, Education, Experience
 
+def strip_html(value):
+    return strip_tags(value or "").strip()
+
 class ProjectForm(ModelForm):
     class Meta:
         model = Project
@@ -169,6 +172,24 @@ class ExperienceForm(ModelForm):
             "ended_at": DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "description": Textarea(attrs={"rows": 5}),
         }
+    
+    def clean_title(self):
+        title = strip_html(self.cleaned_data["title"])
+        if not title:
+            raise ValidationError("Nama organisasi/event tidak boleh hanya berisi tag HTML.")
+        return title
+
+    def clean_role(self):
+        role = strip_html(self.cleaned_data["role"])
+        if not role:
+            raise ValidationError("Role tidak boleh hanya berisi tag HTML.")
+        return role
+
+    def clean_description(self):
+        description = strip_html(self.cleaned_data["description"])
+        if not description:
+            raise ValidationError("Deskripsi tidak boleh hanya berisi tag HTML.")
+        return description
 
     def clean(self):
         cleaned = super().clean()
