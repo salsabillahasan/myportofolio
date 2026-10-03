@@ -183,7 +183,7 @@
     function closeExperienceModal() {
         document.getElementById('add-experience-modal').hidePopover();
     }
-    
+
     // Merakit satu baris timeline dari satu objek JSON experience.
     function buildExperienceRowElement(item, index) {
         const experience = item.fields;
@@ -324,6 +324,77 @@
         clearTimeout(searchDebounceTimer);
         searchExperiences();
     });
+
+    //Tambah experience dengan AJAX 
+    const CREATE_EXPERIENCE_ENDPOINT = "{% url 'main:create_experience_ajax' %}";
+    const experienceForm = document.getElementById('experience-form');
+
+    // Menghapus tanda merah dari semua field.
+    function clearFieldErrors() {
+        experienceForm.querySelectorAll('.letter-field.has-error')
+            .forEach(field => field.classList.remove('has-error'));
+    }
+
+    // Mengubah objek error dari server menjadi daftar pesan yang mudah dibaca,
+    // sekaligus menandai field yang salah dengan class 'has-error'.
+    function formatErrorMessages(errors) {
+        const messages = [];
+
+        for (const [fieldName, fieldErrors] of Object.entries(errors)) {
+            const input = experienceForm.querySelector(`[name="${fieldName}"]`);
+            const wrapper = input ? input.closest('.letter-field') : null;
+            const label = wrapper ? wrapper.querySelector('label').textContent.trim() : '';
+
+            if (wrapper) wrapper.classList.add('has-error');
+
+            fieldErrors.forEach(error => {
+                messages.push(label ? `${label}: ${error.message}` : error.message);
+            });
+        }
+
+        return messages;
+    }
+
+    // Mengirim isi form ke server tanpa reload halaman.
+    async function addExperience(event) {
+        event.preventDefault();
+        clearFieldErrors();
+
+        const submitButton = experienceForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(CREATE_EXPERIENCE_ENDPOINT, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: new FormData(experienceForm),
+            });
+
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                experienceForm.reset();
+                closeExperienceModal();
+                showToast('Berhasil', 'Experience baru berhasil ditambahkan!', 'success');
+                fetchExperiences(searchInput.value.trim());
+            } else {
+                const errorMessages = result.errors
+                    ? formatErrorMessages(result.errors)
+                    : [result.message || `Terjadi kesalahan (status ${response.status}).`];
+                showToast('Gagal menambahkan experience', errorMessages.join(' '), 'error', 5000);
+            }
+        } catch (error) {
+            console.error('Error adding experience:', error);
+            showToast('Gagal menambahkan experience', 'Tidak dapat terhubung ke server. Silakan coba lagi.', 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    // Form hanya ada untuk superuser, jadi cek dulu sebelum memasang listener
+    if (experienceForm) {
+        experienceForm.addEventListener('submit', addExperience);
+    }
 
     // Start application
     fetchExperiences();
