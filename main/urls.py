@@ -24,7 +24,8 @@ from main.views import (
     create_experience,
     update_experience,
     delete_experience,
-    create_project_ajax
+    create_project_ajax,
+    toggle_experience_star,
 )
 
 app_name = "main"
@@ -51,4 +52,5 @@ urlpatterns = [
     path("experience/<uuid:experience_id>/delete/", delete_experience, name="delete_experience"),
     re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
     path("projects/add-ajax/", create_project_ajax, name="create_project_ajax"),
+    path("experience/<uuid:experience_id>/star/", toggle_experience_star, name="toggle_experience_star"),
 ]

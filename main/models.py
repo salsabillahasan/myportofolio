@@ -24,7 +24,10 @@ class Experience(models.Model):
     photo_url = models.URLField(blank=True, max_length=500)
     logo_image = models.ImageField(upload_to="experience/logos/", blank=True, null=True)
     photo_image = models.ImageField(upload_to="experience/photos/", blank=True, null=True)
-
+    starred_by = models.ManyToManyField(
+            User, related_name="starred_experience", blank=True
+        )
+    
     @property
     def logo_src(self):
         if self.logo_image:
