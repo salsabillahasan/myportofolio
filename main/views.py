@@ -91,14 +91,19 @@ def create_experience(request):
 @login_required(login_url="/login/")
 def update_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
+    is_editor = request.user.groups.filter(name="Editor").exists()
+
+    if not request.user.is_superuser and not is_editor:
+        raise PermissionDenied
+    
     form = ExperienceForm(request.POST or None, request.FILES or None, instance=experience)
 
+    
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "Experience successfully updated!")
         return redirect("main:show_experience")
 
-    is_editor = request.user.groups.filter(name="Editor").exists()
 
     context = {
         "name": "Salsabilla Hasan",
@@ -121,6 +126,18 @@ def delete_experience(request, experience_id):
         experience.delete()
         messages.success(request, "Experience successfully deleted!")
 
+    return redirect("main:show_experience")
+
+@login_required(login_url="/login/")
+def toggle_experience_star(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+
+    if request.method == "POST":
+        if request.user in experience.starred_by.all():
+            experience.starred_by.remove(request.user)
+        else:
+            experience.starred_by.add(request.user)
+    
     return redirect("main:show_experience")
 
 def show_education(request):
