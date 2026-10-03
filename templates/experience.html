@@ -10,13 +10,10 @@
 
     <section class="journey-header">
         <div class="film-strip film-strip--left">
-            {% for photo in film_left %}
-                {% if photo %}
-                    <img class="film-strip__slot" src="{{ photo }}" alt="">
-                {% else %}
-                    <span class="film-strip__slot film-strip__slot--empty"></span>
-                {% endif %}
-            {% endfor %}
+            <span class="film-strip__slot film-strip__slot--empty"></span>
+            <span class="film-strip__slot film-strip__slot--empty"></span>
+            <span class="film-strip__slot film-strip__slot--empty"></span>
+            <span class="film-strip__slot film-strip__slot--empty"></span>
             <img class="film-strip__frame" src="{% static 'img/filmstrip.png' %}" alt="">
         </div>
 
@@ -29,13 +26,10 @@
         </div>
 
         <div class="film-strip film-strip--right">
-            {% for photo in film_right %}
-                {% if photo %}
-                    <img class="film-strip__slot" src="{{ photo }}" alt="">
-                {% else %}
-                    <span class="film-strip__slot film-strip__slot--empty"></span>
-                {% endif %}
-            {% endfor %}
+            <span class="film-strip__slot film-strip__slot--empty"></span>
+            <span class="film-strip__slot film-strip__slot--empty"></span>
+            <span class="film-strip__slot film-strip__slot--empty"></span>
+            <span class="film-strip__slot film-strip__slot--empty"></span>
             <img class="film-strip__frame" src="{% static 'img/filmstrip.png' %}" alt="">
         </div>
     </section>
@@ -48,60 +42,248 @@
         </div>
     {% endif %}
 
-    <section class="timeline" aria-label="Experience timeline">
-        {% for experience in experience_list %}
-            <article class="timeline__row {% if forloop.counter|divisibleby:2 %}timeline__row--reverse{% endif %}">
+    <!-- Loading State -->
+    <p id="experience-loading" class="timeline__empty hide">Loading the journey...</p>
 
-                <div class="timeline__text">
-                    <p class="timeline__date label">
-                        {{ experience.started_at|date:"M Y" }}
-                        {% if experience.ended_at %}
-                            — {{ experience.ended_at|date:"M Y" }}
-                        {% else %}
-                            — Present
-                        {% endif %}
-                    </p>
-                    <h2 class="timeline__title">{{ experience.title }}</h2>
-                    <p class="timeline__role">{{ experience.role }}</p>
-                    <div class="timeline__desc">{{ experience.description|safe|linebreaksbr }}</div>
-                    
-                    <div class="timeline__actions">
-                        {% if user.is_superuser or is_editor %}
-                        <a href="{% url 'main:update_experience' experience.id %}" class="btn btn--burgundy">Edit</a>
-                        {% endif %}
+    <!-- Error State -->
+    <p id="experience-error" class="timeline__empty hide">Failed to load experiences. Please try again.</p>
 
-                        {% if user.is_superuser %}
-                            {% include "components/experience_delete_modal.html" with experience=experience %}   
-                        {% endif %}
-                    </div>
+    <!-- Empty State -->
+    <p id="experience-empty" class="timeline__empty hide">No experience added yet.</p>
 
-                </div>
-
-                <span class="timeline__node" aria-hidden="true"></span>
-
-                <div class="timeline__photo">
-                    <figure class="polaroid">
-                        <img class="polaroid__clip" src="{% static 'img/clip.png' %}" alt="">
-                        {% if experience.photo_src %}
-                            <img class="polaroid__img" src="{{ experience.photo_src }}" alt="Activity photo: {{ experience.title }}">
-                        {% else %}
-                            <div class="polaroid__img polaroid__img--empty">
-                                <span class="label">Activity Photo</span>
-                            </div>
-                        {% endif %}
-                        <figcaption class="polaroid__caption">
-                            {% if experience.logo_src %}
-                                <img class="polaroid__logo" src="{{ experience.logo_src }}" alt="{{ experience.title }} logo">
-                            {% else %}
-                                <span class="polaroid__name">{{ experience.title }}</span>
-                            {% endif %}
-                        </figcaption>
-                    </figure>
-                </div>
-            </article>
-        {% empty %}
-            <p class="timeline__empty">No experience added yet.</p>
-        {% endfor %}
-    </section>
+    <!-- Timeline (diisi JavaScript) -->
+    <section id="experience-timeline" class="timeline hide" aria-label="Experience timeline"></section>
 </main>
+
+{% if user.is_superuser %}
+    <div id="delete-experience-modal"
+         class="project-delete-modal"
+         popover="auto"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="delete-experience-modal-title">
+        <button type="button"
+                class="project-delete-modal__backdrop"
+                popovertarget="delete-experience-modal"
+                popovertargetaction="hide"
+                aria-label="Tutup konfirmasi hapus"></button>
+
+        <div class="project-delete-modal__content">
+            <button type="button"
+                    class="project-delete-modal__close"
+                    popovertarget="delete-experience-modal"
+                    popovertargetaction="hide"
+                    aria-label="Tutup konfirmasi hapus">×</button>
+
+            <h2 id="delete-experience-modal-title">Hapus Experience?</h2>
+            <p>Apakah Anda yakin ingin menghapus <strong id="delete-experience-name"></strong>?</p>
+
+            <div class="project-delete-modal__actions">
+                <button type="button"
+                        class="button button-secondary"
+                        popovertarget="delete-experience-modal"
+                        popovertargetaction="hide">Batal</button>
+                <form id="delete-experience-form" method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="button button-danger">Ya, Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<script>
+    // Konfigurasi 
+    const EXPERIENCE_ENDPOINT = "{% url 'main:get_experience_json' %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
+    const CLIP_IMG = "{% static 'img/clip.png' %}";
+    const FILM_SLOTS_PER_STRIP = 4;
+
+    // Dummy UUID akan diganti dengan ID asli dari data JSON
+    const DUMMY_ID = "00000000-0000-0000-0000-000000000000";
+    const STAR_URL = "{% url 'main:toggle_experience_star' '00000000-0000-0000-0000-000000000000' %}";
+    const EDIT_URL = "{% url 'main:update_experience' '00000000-0000-0000-0000-000000000000' %}";
+    const DELETE_URL = "{% url 'main:delete_experience' '00000000-0000-0000-0000-000000000000' %}";
+
+    let experienceAbortController;
+
+    // Elemen DOM
+    const loadingState = document.getElementById('experience-loading');
+    const errorState = document.getElementById('experience-error');
+    const emptyState = document.getElementById('experience-empty');
+    const timeline = document.getElementById('experience-timeline');
+    const filmStrips = document.querySelectorAll('.film-strip');
+
+    // Menampilkan satu bagian halaman dan menyembunyikan sisanya.
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showTimeline = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        timeline.classList.toggle('hide', !showTimeline);
+    }
+
+    // Mengisi dua roll film (kiri dan kanan) dengan maksimal 8 foto kegiatan
+    function renderFilmStrips(experiences) {
+        const photos = experiences
+            .map(item => item.fields.photo_src)
+            .filter(photo => photo)
+            .slice(0, FILM_SLOTS_PER_STRIP * filmStrips.length);
+
+        filmStrips.forEach((strip, stripIndex) => {
+            strip.querySelectorAll('.film-strip__slot').forEach(slot => slot.remove());
+            const frame = strip.querySelector('.film-strip__frame');
+
+            for (let i = 0; i < FILM_SLOTS_PER_STRIP; i++) {
+                const photo = photos[stripIndex * FILM_SLOTS_PER_STRIP + i];
+                let slot;
+
+                if (photo) {
+                    slot = document.createElement('img');
+                    slot.className = 'film-strip__slot';
+                    slot.src = photo;
+                    slot.alt = '';
+                } else {
+                    slot = document.createElement('span');
+                    slot.className = 'film-strip__slot film-strip__slot--empty';
+                }
+
+                frame.before(slot);
+            }
+        });
+    }
+
+    // Mengisi lalu membuka modal konfirmasi hapus.
+    function openDeleteModal(experienceId, experienceTitle) {
+        document.getElementById('delete-experience-name').textContent = experienceTitle;
+        document.getElementById('delete-experience-form').action = DELETE_URL.replace(DUMMY_ID, experienceId);
+        document.getElementById('delete-experience-modal').showPopover();
+    }
+
+    // Merakit satu baris timeline dari satu objek JSON experience.
+    function buildExperienceRowElement(item, index) {
+        const experience = item.fields;
+        const experienceId = item.pk;
+
+        const article = document.createElement('article');
+        article.className = 'timeline__row';
+        if ((index + 1) % 2 === 0) {
+            article.classList.add('timeline__row--reverse');
+        }
+
+        const photoHtml = experience.photo_src
+            ? `<img class="polaroid__img" src="${escapeHtml(experience.photo_src)}" alt="Activity photo: ${escapeHtml(experience.title)}">`
+            : `<div class="polaroid__img polaroid__img--empty"><span class="label">Activity Photo</span></div>`;
+
+        const captionHtml = experience.logo_src
+            ? `<img class="polaroid__logo" src="${escapeHtml(experience.logo_src)}" alt="${escapeHtml(experience.title)} logo">`
+            : `<span class="polaroid__name">${escapeHtml(experience.title)}</span>`;
+
+        // Tombol star (bisa dilihat semua orang; yang belum login akan diarahkan ke halaman login)
+        const isStarredClass = experience.is_starred ? ' is-starred' : '';
+        const starText = experience.is_starred ? 'Unstar' : 'Star';
+        const starTitle = experience.star_count > 0
+            ? `Dibintangi oleh ${escapeHtml(experience.starred_by_names)}`
+            : 'Jadilah yang pertama memberi star';
+
+        const starHtml = `
+            <form method="post" action="${STAR_URL.replace(DUMMY_ID, experienceId)}" class="star-form">
+                {% csrf_token %}
+                <button type="submit" class="button button-star${isStarredClass}" title="${starTitle}">
+                    <span aria-hidden="true">★</span>
+                    ${starText}
+                    <span class="star-count">${experience.star_count}</span>
+                </button>
+            </form>`;
+
+        const editHtml = (IS_SUPERUSER || IS_EDITOR)
+            ? `<a href="${EDIT_URL.replace(DUMMY_ID, experienceId)}" class="btn btn--burgundy">Edit</a>`
+            : '';
+
+        const deleteHtml = IS_SUPERUSER
+            ? `<button type="button" class="btn btn--danger-outline" data-delete>Delete</button>`
+            : '';
+
+        article.innerHTML = `
+            <div class="timeline__text">
+                <p class="timeline__date label">${escapeHtml(experience.period)}</p>
+                <h2 class="timeline__title">${escapeHtml(experience.title)}</h2>
+                <p class="timeline__role">${escapeHtml(experience.role)}</p>
+                <div class="timeline__desc">${escapeHtml(experience.description)}</div>
+
+                <div class="timeline__actions">
+                    ${starHtml}
+                    ${editHtml}
+                    ${deleteHtml}
+                </div>
+            </div>
+
+            <span class="timeline__node" aria-hidden="true"></span>
+
+            <div class="timeline__photo">
+                <figure class="polaroid">
+                    <img class="polaroid__clip" src="${CLIP_IMG}" alt="">
+                    ${photoHtml}
+                    <figcaption class="polaroid__caption">${captionHtml}</figcaption>
+                </figure>
+            </div>
+        `;
+
+        const deleteButton = article.querySelector('[data-delete]');
+        if (deleteButton) {
+            deleteButton.addEventListener('click', () => openDeleteModal(experienceId, experience.title));
+        }
+
+        return article;
+    }
+
+    // Mengambil data experience dari server lalu menampilkannya.
+    async function fetchExperiences(searchQuery = "") {
+        // Batalkan permintaan sebelumnya yang belum selesai
+        if (experienceAbortController) experienceAbortController.abort();
+        experienceAbortController = new AbortController();
+
+        try {
+            displayPageSection({ showLoading: true });
+
+            const url = searchQuery
+                ? `${EXPERIENCE_ENDPOINT}?q=${encodeURIComponent(searchQuery)}`
+                : EXPERIENCE_ENDPOINT;
+
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: experienceAbortController.signal,
+            });
+
+            if (!response.ok) throw new Error(`Failed to fetch data (status ${response.status})`);
+
+            const experienceData = await response.json();
+
+            // Roll film selalu menampilkan semua foto, bukan hasil pencarian
+            if (!searchQuery) renderFilmStrips(experienceData);
+
+            if (experienceData.length === 0) {
+                emptyState.textContent = searchQuery
+                    ? 'No experience found with that keyword.'
+                    : 'No experience added yet.';
+                displayPageSection({ showEmpty: true });
+                return;
+            }
+
+            timeline.innerHTML = '';
+            experienceData.forEach((item, index) => {
+                timeline.appendChild(buildExperienceRowElement(item, index));
+            });
+            displayPageSection({ showTimeline: true });
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error('Error loading experiences:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    // Start application
+    fetchExperiences();
+</script>
+
 {% endblock content %}

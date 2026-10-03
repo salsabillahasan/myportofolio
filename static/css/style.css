@@ -3478,3 +3478,8 @@ h1 {
         text-align: center;
     }
 }
+
+/* Pertahankan baris baru (Enter) di deskripsi experience yang dirender lewat AJAX */
+.timeline__desc {
+    white-space: pre-line;
+}

@@ -52,21 +52,41 @@ def register(request):
 def show_experience(request):
     is_editor = request.user.groups.filter(name="Editor").exists()
 
-    experience_list = Experience.objects.order_by("-started_at")
-
-    # 8 slot roll film: 4 di kiri, 4 di kanan (slot kosong = None)
-    film_photos = [e.photo_src for e in experience_list if e.photo_src][:8]
-    film_photos += [None] * (8 - len(film_photos))
-
     context = {
         "name": "Salsabilla Hasan",
         "nickname": "Alsa",
-        "experience_list": experience_list,
-        "film_left": film_photos[:4],
-        "film_right": film_photos[4:],
         "is_editor": is_editor,
     }
     return render(request, "experience.html", context)
+
+def get_experience_json(request):
+    search_query = request.GET.get("q", "").strip()
+    experiences = Experience.objects.prefetch_related("starred_by").order_by("-started_at")
+
+    data = []
+    for experience in experiences:
+        starred_users = experience.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+
+        start_label = experience.started_at.strftime("%b %Y")
+        end_label = experience.ended_at.strftime("%b %Y") if experience.ended_at else "Present"
+
+        data.append({
+            "pk": str(experience.id),
+            "fields": {
+                "title": experience.title,
+                "role": experience.role,
+                "description": experience.description,
+                "period": f"{start_label} — {end_label}",
+                "photo_src": experience.photo_src,
+                "logo_src": experience.logo_src,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": ", ".join([u.username for u in starred_users]),
+            }
+        })
+
+    return JsonResponse(data, safe=False)
 
 @login_required(login_url="/login/")
 def create_experience(request):
