@@ -6,6 +6,16 @@ Kelas : PBP A
 
 alsa lagi belajar tutorial github, bismillah pbpnya A dan dilancarkan segalanya.. iloveu bu jess, iloveu asdos pbp <3
 
+## Progres Mingguan
+
+| Tugas | Topik | Yang Saya Bangun |
+|---|---|---|
+| Tugas 1 | HTML & CSS | Halaman profil dan section Experience yang responsif |
+| Tugas 2 | Django MVT | Memindahkan Experience ke model Django dan menambahkan Education |
+| Tugas 3 | Form & Data Delivery | ModelForm, CRUD Education, serta endpoint JSON |
+| Tugas 4 | Autentikasi & Otorisasi | Login/logout, cookie, peran Editor, dan fitur star |
+| Tugas 5 | JavaScript & AJAX | Halaman Experience berbasis AJAX: pencarian dengan debouncing, modal tambah data, toast, dan perlindungan XSS |
+
 ### Tugas 1
 
 1. Saya menggunakan <section> dan <article> untuk membuat section baru, yaitu Experience. Menurut saya, penggunaan kedua elemen tersebut sangat membantu dalam membuat struktur halaman menjadi lebih terorganisir. Setelah belajar dan mengeksplorasi selama pengerjaan tugas, saya memahami bahwa <section> dapat digunakan sebagai wadah untuk mengelompokkan suatu bagian atau topik pada halaman, sedangkan <article> digunakan untuk membungkus setiap konten pengalaman yang berdiri sendiri. Selain membantu struktur HTML menjadi lebih jelas, pembagian ini juga memudahkan saya ketika ingin memberikan styling pada bagian tersebut menggunakan CSS.
@@ -104,3 +114,34 @@ Konsep ini sudah lama saya rancang di Figma, mulai dari moodboard, referensi vis
 Dengan AI, saya mengeksplorasi tata letak setiap section berdasarkan referensi dan arahan saya, lalu menerjemahkannya menjadi kode: menulis ulang style.css, menyesuaikan template HTML, hingga membantu menelusuri error saat deploy ke PWS. Sepanjang proses itu, saya tetap yang menentukan arah desain, memilih elemen, merevisi hasil yang belum sesuai, lalu mengintegrasikan, menguji di desktop maupun mobile, dan melakukan deploy.
 
 Saya menuliskan bagian ini karena ingin transparan tentang proses di balik website ini. Seluruh kode hasil bantuan AI sudah saya baca, sesuaikan dengan struktur project saya, dan uji sebelum di-commit. Bagi saya, proyek ini juga menjadi proses belajar: bagaimana sebuah desain di Figma bisa dihidupkan menjadi website yang benar-benar berjalan.
+
+### Tugas 5
+
+1. Debouncing menurut saya adalah teknik untuk menunda suatu fungsi sampai pengguna berhenti melakukan sesuatu selama beberapa saat. Awalnya saya bingung kenapa pencarian tidak langsung dijalankan setiap kali saya mengetik, lalu saya bertanya ke AI dan dijelaskan dengan analogi pelayan restoran. Kalau pelayan langsung pergi ke dapur setiap kali kita menyebut satu kata pesanan, pelayannya akan capek dan dapurnya bingung, padahal pesanan yang benar hanya yang terakhir. Pelayan yang baik akan menunggu sampai kita selesai bicara, baru pergi ke dapur sekali saja. Dari situ saya jadi paham kalau debouncing membuat pencarian menunggu sekitar 300 milidetik setelah saya berhenti mengetik, dan kalau saya mengetik lagi sebelum waktunya habis, waktunya diulang dari awal.
+
+Teknik ini penting untuk fitur pencarian karena tanpa debouncing, setiap huruf yang diketik akan langsung mengirim permintaan ke server. Contohnya ketika saya mengetik "RISTEK", berarti ada enam permintaan yang dikirim, padahal yang saya butuhkan hanya hasil yang terakhir. Saya juga mencoba membuktikannya sendiri dengan melihat tab Network di DevTools, dan ternyata setelah memakai debouncing, permintaan yang muncul hanya satu ketika saya mengetik dengan lancar. Jadi menurut saya debouncing membantu supaya server tidak terlalu terbebani dan hasil pencarian tetap terasa cepat.
+
+2. Setelah mempelajari tutorial, saya mengetahui bahwa fetch() tidak langsung memberikan data, tetapi memberikan Promise atau semacam "janji" bahwa data akan datang nanti. Karena itu kita perlu menggunakan await supaya kode menunggu dulu sampai jawaban dari server benar-benar datang, baru setelah itu lanjut ke baris berikutnya. await ini juga hanya bisa dipakai di dalam fungsi yang diberi async.
+
+Saya sempat bingung dengan await, jadi saya bertanya ke AI apa sebenarnya maksud await dan apa yang terjadi kalau tidak dipakai. AI menjelaskannya dengan analogi memesan makanan di food court yang memakai nomor antrean. Saat kita memesan, kasir tidak langsung memberikan makanannya, tetapi hanya memberikan struk nomor antrean. Struk itu sama seperti Promise, yaitu janji bahwa makanannya akan datang nanti. await sama seperti menunggu sampai nomor kita dipanggil, baru setelah itu kita ambil makanannya.
+
+Kalau await tidak digunakan, kode akan langsung lanjut berjalan sebelum datanya datang, jadi yang kita pegang masih Promise, bukan datanya. Akibatnya, response.ok menjadi undefined dan response.json() bisa error, sehingga halaman tidak bisa menampilkan data dengan benar. Selain itu, error dari server juga tidak akan tertangkap oleh try...catch. AI juga menjelaskan bahwa await hanya bisa dipakai di dalam fungsi yang diberi async. Analogi antrean ini membuat saya lebih mudah memahami kenapa await diperlukan.
+
+3. XSS (Cross-Site Scripting) adalah serangan ketika seseorang menyisipkan kode JavaScript ke dalam website, lalu kode tersebut ikut dijalankan di browser orang lain yang membuka website itu. Saat mengikuti tutorial, saya mencoba sendiri menambahkan data dengan judul <img src="x" onerror="alert('XSS!')">, dan ternyata benar muncul alert di halaman. Dari situ saya jadi sadar kalau data yang dimasukkan pengguna bisa berbahaya kalau tidak ditangani dengan benar.
+
+Menurut saya data yang ditampilkan lewat AJAX lebih rentan karena template Django sebenarnya sudah otomatis melakukan escaping, jadi karakter seperti < dan > diubah menjadi teks biasa. Sedangkan ketika data ditampilkan lewat JavaScript menggunakan innerHTML, Django sudah tidak ikut campur lagi, sehingga browser bisa menganggap data tersebut sebagai kode HTML sungguhan. Ketika saya bertanya ke AI dan meminta pengecekan kode, saya juga baru tahu bahwa template Experience saya sebelumnya memakai |safe, yang ternyata mematikan perlindungan otomatis dari Django. Karena itu, pada tugas ini saya menambahkan escapeHtml di JavaScript dan strip_tags di form Django supaya data yang masuk dan yang ditampilkan sama-sama aman.
+
+---------------------------------------------------------------------------------
+Penggunaan AI - Tugas 5
+
+Pada tugas ini saya menggunakan AI (Claude dari Anthropic) sebagai teman belajar. Karena JavaScript dan AJAX masih cukup baru buat saya, saya lebih banyak bertanya dulu tentang konsepnya sebelum mengerjakan, misalnya apa itu AJAX, kenapa fetch perlu await, bagaimana debouncing bekerja, dan kenapa data dari JavaScript bisa terkena XSS. Saya juga meminta AI menjelaskan dengan analogi sederhana supaya saya lebih mudah membayangkannya.
+
+Saat mengerjakan, saya memberikan konteks berupa instruksi tugas dan kode project saya, lalu AI membantu memberikan arahan dan contoh kode secara bertahap. Setiap selesai satu langkah, saya mencoba menjalankannya sendiri di browser, lalu bertanya lagi kalau ada bagian yang belum saya pahami. Contohnya saya sempat bertanya kenapa pencarian Experience memakai Q sedangkan pencarian Projects di tutorial tidak, dan dari situ saya jadi paham kalau Q dipakai untuk mencari dengan kondisi "atau" di lebih dari satu field.
+
+Bagian yang dibantu AI adalah pemahaman konsep AJAX, fetch, async/await, debouncing, CSRF, dan XSS, serta arahan dan contoh kode untuk membuat halaman Experience berbasis AJAX, fitur star, pencarian dengan debouncing, modal tambah data, toast, dan perlindungan XSS.
+
+Selama prosesnya, saya juga sadar bahwa AI tidak bisa melihat tampilan website saya secara langsung. Waktu tutorial, kartu proyek saya sempat tidak muncul, dan saya harus mengecek Console, mengirim screenshot, dan mengecek ulang HTML saya sampai ketemu bahwa form pencarian tidak sengaja terhapus dan carousel saya jadi double. Saya juga tidak selalu mengikuti saran AI, misalnya saya memilih Experience dibanding Education yang disarankan, dan saya meminta modal hapus yang sesuai dengan desain portfolio saya dibanding memakai confirm() bawaan browser.
+
+Semua kode yang dibantu AI sudah saya baca, sesuaikan dengan project saya, dan saya uji untuk setiap peran sebelum di-commit.
+
+Dokumentasi percakapan AI: ristek.link/AiChatAlsa
