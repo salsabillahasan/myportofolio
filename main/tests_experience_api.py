@@ -3,7 +3,7 @@ from datetime import date
 
 from django.contrib.auth.models import Group, User
 from django.urls import reverse
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 
 from main.models import Experience
 
@@ -155,3 +155,135 @@ class ExperienceAPITest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.data["is_starred"])
         self.assertEqual(response.data["star_count"], 0)
+    
+
+    def test_invalid_title_is_rejected(self):
+        self.client.force_authenticate(user=self.owner)
+
+        invalid_data = self.payload.copy()
+        invalid_data["title"] = "<b> </b>"
+
+        response = self.client.post(
+            self.list_url,
+            invalid_data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("title", response.data)
+        self.assertEqual(Experience.objects.count(), 1)
+
+    def test_invalid_date_is_rejected(self):
+        self.client.force_authenticate(user=self.owner)
+
+        invalid_data = self.payload.copy()
+        invalid_data["started_at"] = "2026-05-01"
+        invalid_data["ended_at"] = "2026-01-01"
+
+        response = self.client.post(
+            self.list_url,
+            invalid_data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("ended_at", response.data)
+        self.assertEqual(Experience.objects.count(), 1)
+
+    def test_html_tags_are_removed(self):
+        self.client.force_authenticate(user=self.owner)
+
+        data = self.payload.copy()
+        data["title"] = "<b>New Experience</b>"
+
+        response = self.client.post(
+            self.list_url,
+            data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["title"], "New Experience")
+
+    def test_guest_cannot_modify_database(self):
+        original_role = self.experience.role
+
+        response = self.client.patch(
+            self.detail_url,
+            {"role": "Changed by guest"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        self.experience.refresh_from_db()
+        self.assertEqual(self.experience.role, original_role)
+
+    def test_regular_user_cannot_create_or_delete(self):
+        self.client.force_authenticate(user=self.visitor)
+
+        initial_count = Experience.objects.count()
+
+        response = self.client.post(
+            self.list_url,
+            self.payload,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(Experience.objects.count(), initial_count)
+
+        response = self.client.delete(self.detail_url)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(
+            Experience.objects.filter(
+                pk=self.experience.id
+            ).exists()
+        )
+
+    def test_csrf_is_required_for_logged_in_user(self):
+        csrf_client = APIClient(enforce_csrf_checks=True)
+
+        logged_in = csrf_client.login(
+            username="visitor_exp",
+            password="test-password",
+        )
+
+        self.assertTrue(logged_in)
+
+        response = csrf_client.post(self.star_url)
+
+        self.assertEqual(response.status_code, 403)
+
+        self.assertFalse(
+            self.experience.starred_by.filter(
+                pk=self.visitor.pk
+            ).exists()
+        )
+
+
+    def test_editor_can_clear_experience_images(self):
+        self.experience.logo_image = "experience/logos/test.jpg"
+        self.experience.photo_image = "experience/photos/test.jpg"
+        self.experience.save(
+            update_fields=["logo_image", "photo_image"]
+        )
+
+        self.client.force_authenticate(user=self.editor)
+
+        response = self.client.patch(
+            self.detail_url,
+            {
+                "clear_logo_image": True,
+                "clear_photo_image": True,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.experience.refresh_from_db()
+        self.assertFalse(self.experience.logo_image)
+        self.assertFalse(self.experience.photo_image)
+
