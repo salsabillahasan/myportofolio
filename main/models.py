@@ -55,6 +55,7 @@ class Education(models.Model):
     description = models.TextField(blank=True)
     thumbnail = models.URLField(blank=True, null=True)
     logo_image = models.ImageField(upload_to="education/logos/", blank=True, null=True)
+    starred_by = models.ManyToManyField(User, related_name="starred_education", blank=True)
 
     @property
     def logo_src(self):
