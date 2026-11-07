@@ -16,10 +16,13 @@
                     <img class="education-title__stars" src="{% static 'img/stars.png' %}" alt="">
                 </h1>
 
+
                 {% if user.is_superuser %}
-                    <a href="{% url 'main:create_education' %}" class="btn btn--gold">
+                    <button type="button"
+                            class="btn btn--gold"
+                            popovertarget="add-education-modal">
                         <span aria-hidden="true">+</span> Add Education
-                    </a>
+                    </button>
                 {% endif %}
 
                     <form id="education-search-form" class="edu-search" role="search">
@@ -116,6 +119,132 @@
 {% endif %}
 
 </main>
+
+{% if user.is_superuser %}
+<div id="add-education-modal"
+     class="project-delete-modal"
+     popover="auto"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="add-education-title">
+
+    <button type="button"
+            class="project-delete-modal__backdrop"
+            popovertarget="add-education-modal"
+            popovertargetaction="hide"
+            aria-label="Close modal">
+    </button>
+
+    <div class="project-delete-modal__content education-add-modal">
+
+        <button type="button"
+                class="project-delete-modal__close"
+                popovertarget="add-education-modal"
+                popovertargetaction="hide"
+                aria-label="Close">×</button>
+
+        <h2 id="add-education-title">Add Education</h2>
+
+        <p class="education-add-modal__intro">
+            A new page for my education journey.
+        </p>
+
+        <form id="education-add-form"
+              enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="letter-field">
+                <label for="add-edu-institution" class="label">
+                    Institution
+                </label>
+                <input id="add-edu-institution"
+                       type="text"
+                       name="institution"
+                       required>
+            </div>
+
+            <div class="letter-field">
+                <label for="add-edu-degree" class="label">
+                    Degree
+                </label>
+                <input id="add-edu-degree"
+                       type="text"
+                       name="degree"
+                       required>
+            </div>
+
+            <div class="letter-field">
+                <label for="add-edu-field" class="label">
+                    Field of Study
+                </label>
+                <input id="add-edu-field"
+                       type="text"
+                       name="field_of_study"
+                       required>
+            </div>
+
+            <div class="letter-field">
+                <label for="add-edu-started" class="label">
+                    Start Date
+                </label>
+                <input id="add-edu-started"
+                       type="datetime-local"
+                       name="started_at">
+            </div>
+
+            <div class="letter-field">
+                <label for="add-edu-ended" class="label">
+                    End Date
+                </label>
+                <input id="add-edu-ended"
+                       type="datetime-local"
+                       name="ended_at">
+            </div>
+
+            <div class="letter-field">
+                <label for="add-edu-description" class="label">
+                    Description
+                </label>
+                <textarea id="add-edu-description"
+                          name="description"
+                          rows="3"></textarea>
+            </div>
+
+            <div class="letter-field">
+                <label for="add-edu-thumbnail" class="label">
+                    Thumbnail URL
+                </label>
+                <input id="add-edu-thumbnail"
+                       type="url"
+                       name="thumbnail">
+            </div>
+
+            <div class="letter-field">
+                <label for="add-edu-logo" class="label">
+                    Upload Logo
+                </label>
+                <input id="add-edu-logo"
+                       type="file"
+                       name="logo_image"
+                       accept="image/*">
+            </div>
+
+            <div class="project-delete-modal__actions">
+                <button type="button"
+                        class="button button-secondary"
+                        popovertarget="add-education-modal"
+                        popovertargetaction="hide">
+                    Cancel
+                </button>
+
+                <button type="submit" class="btn btn--gold">
+                    Save Education
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
 
 {% csrf_token %}
 <script>
@@ -522,6 +651,128 @@
 
         modal.showPopover();
     });
+
+const educationAddForm = document.getElementById('education-add-form');
+
+if (educationAddForm) {
+    educationAddForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const submitButton = educationAddForm.querySelector(
+            'button[type="submit"]'
+        );
+
+        if (submitButton.disabled) return;
+        submitButton.disabled = true;
+
+        // Hapus tanda error dari percobaan sebelumnya
+        educationAddForm.querySelectorAll('.letter-field.has-error')
+            .forEach(field => field.classList.remove('has-error'));
+
+        try {
+            const formData = new FormData(educationAddForm);
+
+            // Field tanggal kosong tidak perlu dikirim
+            for (const fieldName of ['started_at', 'ended_at']) {
+                if (!formData.get(fieldName)) {
+                    formData.delete(fieldName);
+                }
+            }
+
+            // Jangan mengirim file logo jika belum memilih file
+            const logoFile = formData.get('logo_image');
+
+            if (logoFile instanceof File && logoFile.size === 0) {
+                formData.delete('logo_image');
+            }
+
+            const csrfToken = educationAddForm.querySelector(
+                '[name="csrfmiddlewaretoken"]'
+            ).value;
+
+            const response = await fetch(EDUCATION_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            });
+
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                const messages = [];
+
+                if (response.status === 400) {
+                    for (const [fieldName, errors] of Object.entries(result)) {
+                        const input = educationAddForm.querySelector(
+                            `[name="${fieldName}"]`
+                        );
+
+                        if (input) {
+                            input.closest('.letter-field')
+                                ?.classList.add('has-error');
+                        }
+
+                        const errorList = Array.isArray(errors)
+                            ? errors
+                            : [errors];
+
+                        errorList.forEach(error => {
+                            messages.push(`${fieldName}: ${String(error)}`);
+                        });
+                    }
+                }
+
+                if (response.status === 403) {
+                    messages.push(
+                        'Akun ini tidak memiliki izin menambahkan Education.'
+                    );
+                }
+
+                showToast(
+                    'Gagal menambahkan Education',
+                    messages.join(' ') || `HTTP ${response.status}`,
+                    'error',
+                    5000
+                );
+
+                return;
+            }
+
+            // Jika berhasil, tutup modal
+            educationAddForm.reset();
+
+            document.getElementById(
+                'add-education-modal'
+            ).hidePopover();
+
+            // Ambil ulang data dari API tanpa reload halaman
+            educationSearchInput.value = '';
+
+            await fetchEducations();
+
+            showToast(
+                'Berhasil',
+                'Education baru berhasil ditambahkan!',
+                'success'
+            );
+
+        } catch (error) {
+            console.error('Error adding Education:', error);
+
+            showToast(
+                'Gagal menambahkan Education',
+                'Tidak dapat terhubung ke server.',
+                'error'
+            );
+
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+}
 
 </script>
 

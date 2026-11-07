@@ -3596,3 +3596,31 @@ h1 {
         width: 100%;
     }
 }
+
+
+/* Add Education Modal */
+
+.education-add-modal {
+    width: min(90vw, 600px);
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.education-add-modal__intro {
+    margin-bottom: 24px;
+}
+
+.education-add-modal .letter-field {
+    margin-bottom: 18px;
+}
+
+.education-add-modal .letter-field input,
+.education-add-modal .letter-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.education-add-modal .project-delete-modal__actions {
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
