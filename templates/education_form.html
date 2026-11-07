@@ -16,7 +16,8 @@
     <form method="post"
           action="{% if education %}{% url 'main:update_education' education.id %}{% else %}{% url 'main:create_education' %}{% endif %}"
           enctype="multipart/form-data"
-          class="letter-form">
+          class="letter-form"
+          id="education-api-form">
         {% csrf_token %}
 
         <div class="envelope">
@@ -85,4 +86,147 @@
         </div>
     </form>
 </main>
+
+<script>
+    const educationForm = document.getElementById('education-api-form');
+    const educationApiUrl = "{% if education %}{% url 'api:education-detail' education.id %}{% else %}{% url 'api:education-list' %}{% endif %}";
+    const educationMethod = "{% if education %}PATCH{% else %}POST{% endif %}";
+    const educationPageUrl = "{% url 'main:show_education' %}";
+
+    educationForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const submitButton = educationForm.querySelector(
+            'button[type="submit"]'
+        );
+
+        submitButton.disabled = true;
+
+        educationForm.querySelectorAll('.letter-field.has-error')
+            .forEach(field => field.classList.remove('has-error'));
+
+        try {
+            const formData = new FormData(educationForm);
+
+
+            const clearLogo = formData.has('logo_image-clear');
+
+            formData.delete('logo_image-clear');
+
+            if (clearLogo) {
+                formData.delete('logo_image');
+                formData.set('clear_logo_image', 'true');
+            }
+
+            // Jangan mengirim file kosong.
+            const logoFile = formData.get('logo_image');
+
+            if (logoFile instanceof File && logoFile.size === 0) {
+                formData.delete('logo_image');
+            }
+
+            // Field DateTime harus sesuai format ISO 8601.
+            for (const fieldName of ['started_at', 'ended_at']) {
+                const input = educationForm.querySelector(
+                    `[name="${fieldName}"]`
+                );
+
+                if (input && input.value.trim() === '') {
+                    formData.set(fieldName, '');
+                }
+            }
+
+            const csrfToken = educationForm.querySelector(
+                '[name="csrfmiddlewaretoken"]'
+            ).value;
+
+            const response = await fetch(educationApiUrl, {
+                method: educationMethod,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            });
+
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                if (response.status === 400) {
+                    const messages = [];
+
+                    for (const [fieldName, errors] of Object.entries(result)) {
+                        const input = educationForm.querySelector(
+                            `[name="${fieldName}"]`
+                        );
+
+                        const wrapper = input
+                            ? input.closest('.letter-field')
+                            : null;
+
+                        if (wrapper) {
+                            wrapper.classList.add('has-error');
+                        }
+
+                        const errorList = Array.isArray(errors)
+                            ? errors
+                            : [errors];
+
+                        for (const error of errorList) {
+                            messages.push(
+                                `${fieldName}: ${String(error)}`
+                            );
+                        }
+                    }
+
+                    showToast(
+                        'Gagal menyimpan Education',
+                        messages.join(' ') || 'Periksa kembali isi form.',
+                        'error',
+                        5000
+                    );
+
+                } else if (response.status === 403) {
+                    showToast(
+                        'Akses ditolak',
+                        'Akun ini tidak memiliki izin untuk menyimpan Education.',
+                        'error'
+                    );
+
+                } else {
+                    showToast(
+                        'Gagal menyimpan',
+                        `Terjadi kesalahan HTTP ${response.status}.`,
+                        'error'
+                    );
+                }
+
+                return;
+            }
+
+            showToast(
+                'Berhasil',
+                educationMethod === 'PATCH'
+                    ? 'Education berhasil diperbarui!'
+                    : 'Education berhasil ditambahkan!',
+                'success'
+            );
+
+            window.location.href = educationPageUrl;
+
+        } catch (error) {
+            console.error('Education API error:', error);
+
+            showToast(
+                'Gagal menyimpan Education',
+                'Tidak dapat terhubung ke server.',
+                'error'
+            );
+
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+</script>
+
 {% endblock content %}

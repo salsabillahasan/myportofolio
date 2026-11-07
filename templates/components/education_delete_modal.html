@@ -32,9 +32,13 @@
                     class="button button-secondary"
                     popovertarget="delete-education-{{ education.id }}"
                     popovertargetaction="hide">Batal</button>
-            <form method="post" action="{% url 'main:delete_education' education.id %}">
+
+            <form class="education-delete-form"
+                data-education-id="{{ education.id }}">
                 {% csrf_token %}
-                <button type="submit" class="button button-danger">Ya, Hapus</button>
+                <button type="submit" class="button button-danger">
+                    Ya, Hapus
+                </button>
             </form>
         </div>
     </div>

@@ -20,7 +20,8 @@
     <form method="post"
           action="{% if experience %}{% url 'main:update_experience' experience.id %}{% else %}{% url 'main:create_experience' %}{% endif %}"
           enctype="multipart/form-data"
-          class="letter-form">
+          class="letter-form"
+          id="experience-edit-form">
         {% csrf_token %}
 
         <div class="envelope">
@@ -89,4 +90,143 @@
         </div>
     </form>
 </main>
+
+{% if experience %}
+<script>
+    const editForm = document.getElementById('experience-edit-form');
+    const editApiUrl = "{% url 'api:experience-detail' experience.id %}";
+    const experiencePageUrl = "{% url 'main:show_experience' %}";
+
+    editForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const submitButton = editForm.querySelector(
+            'button[type="submit"]'
+        );
+
+        submitButton.disabled = true;
+
+        editForm.querySelectorAll('.letter-field.has-error')
+            .forEach(field => field.classList.remove('has-error'));
+
+        editForm.querySelectorAll('.api-field-error')
+            .forEach(element => element.remove());
+
+        try {
+            const formData = new FormData(editForm);
+
+            for (const fieldName of ['logo_image', 'photo_image']) {
+                const clearFieldName = `${fieldName}-clear`;
+
+                if (formData.has(clearFieldName)) {
+                    formData.delete(fieldName);
+                    formData.set(`clear_${fieldName}`, 'true');
+                }
+                formData.delete(clearFieldName);
+            }
+
+            // Field kosong untuk tanggal selesai berarti ongoing.
+            if (formData.has('ended_at') && !formData.get('ended_at')) {
+                formData.set('ended_at', '');
+            }
+
+            // File kosong tidak perlu dikirim sebagai upload baru.
+            for (const fieldName of ['logo_image', 'photo_image']) {
+                const file = formData.get(fieldName);
+
+                if (file instanceof File && file.size === 0) {
+                    formData.delete(fieldName);
+                }
+            }
+
+            const response = await fetch(editApiUrl, {
+                method: 'PATCH',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                },
+                body: formData
+            });
+
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                if (response.status === 400) {
+                    const messages = [];
+
+                    for (const [fieldName, errors] of Object.entries(result)) {
+                        const input = editForm.querySelector(
+                            `[name="${fieldName}"]`
+                        );
+
+                        const wrapper = input
+                            ? input.closest('.letter-field')
+                            : null;
+
+                        if (wrapper) {
+                            wrapper.classList.add('has-error');
+                        }
+
+                        const errorList = Array.isArray(errors)
+                            ? errors
+                            : [errors];
+
+                        for (const error of errorList) {
+                            const message = typeof error === 'string'
+                                ? error
+                                : JSON.stringify(error);
+
+                            messages.push(`${fieldName}: ${message}`);
+                        }
+                    }
+
+                    showToast(
+                        'Gagal menyimpan perubahan',
+                        messages.join(' ') || 'Periksa kembali isi form.',
+                        'error',
+                        5000
+                    );
+
+                } else if (response.status === 403) {
+                    showToast(
+                        'Akses ditolak',
+                        'Akun ini tidak memiliki izin untuk mengubah Experience.',
+                        'error'
+                    );
+
+                } else {
+                    showToast(
+                        'Gagal menyimpan',
+                        `Terjadi kesalahan (HTTP ${response.status}).`,
+                        'error'
+                    );
+                }
+
+                return;
+            }
+
+            showToast(
+                'Berhasil',
+                'Experience berhasil diperbarui!',
+                'success'
+            );
+
+            window.location.href = experiencePageUrl;
+
+        } catch (error) {
+            console.error('Error editing experience:', error);
+
+            showToast(
+                'Gagal menyimpan perubahan',
+                'Tidak dapat terhubung ke server.',
+                'error'
+            );
+
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+</script>
+{% endif %}
+
 {% endblock content %}
