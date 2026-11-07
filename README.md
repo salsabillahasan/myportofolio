@@ -6,6 +6,46 @@ Kelas : PBP A
 
 alsa lagi belajar tutorial github, bismillah pbpnya A dan dilancarkan segalanya.. iloveu bu jess, iloveu asdos pbp <3
 
+## Tentang Project
+
+Project ini merupakan website portofolio pribadi yang saya buat selama mengikuti mata kuliah Pemrograman Berbasis Platform. Website ini berisi informasi mengenai profil, pengalaman, pendidikan, dan project yang pernah saya kerjakan.
+
+Untuk tampilannya, saya menggunakan konsep galeri museum vintage yang sebelumnya sudah saya rancang di Figma. Saya ingin portofolio ini tidak hanya menampilkan informasi, tetapi juga memiliki tampilan yang sesuai dengan konsep desain saya.
+
+Website ini dibuat menggunakan Django, HTML, CSS, dan JavaScript. Seiring berjalannya tugas, saya juga menambahkan fitur login, pengaturan hak akses pengguna, CRUD, pencarian, dan star. Pada Tugas 6, saya menggunakan Django REST Framework untuk mengelola data melalui API, kemudian menghubungkannya dengan AJAX supaya beberapa fitur dapat digunakan tanpa harus memuat ulang halaman.
+
+## Cara Menjalankan Project
+
+1. Clone repository dan masuk ke folder project.
+2. Buat virtual environment Python, lalu aktifkan.
+3. Install library yang dibutuhkan melalui `requirements.txt`.
+4. Jalankan migration untuk menyiapkan database.
+5. Jalankan server Django dan buka website melalui browser.
+
+Perintah yang digunakan:
+
+```bash
+git clone https://github.com/salsabillahasan/myportofolio.git
+cd myportofolio
+
+python3 -m venv env
+source env/bin/activate
+
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+Setelah server berjalan, website dapat dibuka melalui `http://127.0.0.1:8000/`.
+
+Untuk menjalankan automated testing:
+
+```bash
+python manage.py test main
+```
+
+Pada pengujian terakhir, seluruh 43 test berhasil dijalankan dengan hasil OK.
+
 ## Progres Mingguan
 
 | Tugas | Topik | Yang Saya Bangun |
@@ -15,6 +55,7 @@ alsa lagi belajar tutorial github, bismillah pbpnya A dan dilancarkan segalanya.
 | Tugas 3 | Form & Data Delivery | ModelForm, CRUD Education, serta endpoint JSON |
 | Tugas 4 | Autentikasi & Otorisasi | Login/logout, cookie, peran Editor, dan fitur star |
 | Tugas 5 | JavaScript & AJAX | Halaman Experience berbasis AJAX: pencarian dengan debouncing, modal tambah data, toast, dan perlindungan XSS |
+| Tugas 6 | Django REST Framework | Membuat API untuk Experience dan Education, mengatur hak akses pengguna, serta menghubungkan fitur CRUD dan star menggunakan AJAX |
 
 ### Tugas 1
 
@@ -143,5 +184,31 @@ Bagian yang dibantu AI adalah pemahaman konsep AJAX, fetch, async/await, debounc
 Selama prosesnya, saya juga sadar bahwa AI tidak bisa melihat tampilan website saya secara langsung. Waktu tutorial, kartu proyek saya sempat tidak muncul, dan saya harus mengecek Console, mengirim screenshot, dan mengecek ulang HTML saya sampai ketemu bahwa form pencarian tidak sengaja terhapus dan carousel saya jadi double. Saya juga tidak selalu mengikuti saran AI, misalnya saya memilih Experience dibanding Education yang disarankan, dan saya meminta modal hapus yang sesuai dengan desain portfolio saya dibanding memakai confirm() bawaan browser.
 
 Semua kode yang dibantu AI sudah saya baca, sesuaikan dengan project saya, dan saya uji untuk setiap peran sebelum di-commit.
+
+Dokumentasi percakapan AI: ristek.link/AiChatAlsa
+
+
+### Tugas 6
+1. Setelah mempelajari REST, saya memahami bahwa REST merupakan cara atau aturan untuk mengatur komunikasi antara website dengan server melalui API. Awalnya saya mengira kalau API sudah mengembalikan data dalam bentuk JSON, berarti API tersebut sudah RESTful. Ternyata JSON hanya format untuk mengirimkan data, sedangkan REST juga memperhatikan bagaimana kita mengakses dan mengelola data tersebut. Misalnya, GET digunakan untuk mengambil data, POST untuk menambahkan data, dan DELETE untuk menghapus data. Saya juga baru memahami perbedaan PUT dan PATCH ketika mengerjakan bagian Education dan Experience. PUT biasanya digunakan ketika kita ingin mengirimkan data secara lengkap untuk mengganti data yang sudah ada, sedangkan PATCH digunakan ketika kita hanya ingin mengubah bagian tertentu saja. Contohnya, kalau saya hanya ingin mengganti deskripsi pendidikan tanpa mengubah nama universitas atau jurusannya, saya bisa menggunakan PATCH. Sedangkan PUT lebih cocok ketika saya ingin memperbarui seluruh informasi pendidikan sekaligus.
+
+2. Serializer pada Django REST Framework digunakan untuk membantu mengubah data dari model Django menjadi bentuk JSON yang bisa dikirim melalui API. Selain itu, serializer juga bisa digunakan untuk memeriksa data yang dikirim pengguna sebelum disimpan ke database. Jadi, serializer tidak hanya mengubah bentuk data, tetapi juga membantu memastikan data yang masuk sudah sesuai. Kalau dibandingkan dengan cara menggunakan JsonResponse pada tutorial sebelumnya, menurut saya serializer lebih memudahkan karena kita tidak perlu menyusun dictionary dan memeriksa setiap data secara manual. Saat membuat API Education dan Experience, saya menggunakan serializer untuk menentukan informasi apa saja yang boleh ditampilkan, termasuk jumlah star dan apakah pengguna sudah memberikan star. Saya juga menambahkan validasi agar input yang kosong atau tidak sesuai bisa ditolak. Dari sini saya jadi memahami kenapa penggunaan serializer membuat pengelolaan data melalui API lebih teratur, terutama ketika fitur website mulai bertambah.
+
+3. Awalnya saya cukup bingung membedakan autentikasi dan otorisasi karena keduanya sama-sama berhubungan dengan akun pengguna. Setelah mempelajarinya, saya memahami bahwa autentikasi digunakan untuk mengetahui siapa pengguna yang sedang mengakses website, misalnya dengan melakukan login. Sedangkan otorisasi digunakan untuk menentukan apa saja yang boleh dilakukan oleh pengguna tersebut setelah login. Contohnya pada website portofolio saya, pengguna biasa yang sudah login boleh memberikan star, tetapi tidak boleh menambahkan atau menghapus Education. Sementara itu, Editor boleh mengubah data, dan superuser memiliki akses untuk menambah, mengubah, serta menghapus data. Saya juga baru memahami bahwa menyembunyikan tombol di halaman saja ternyata belum cukup untuk membatasi akses. Meskipun tombol Delete tidak terlihat, pengguna masih bisa mencoba mengirim permintaan langsung ke API. Karena itu, permission harus diperiksa di server agar pengguna tetap tidak bisa melakukan tindakan yang bukan haknya.
+
+4. Pada awalnya saya mengira kalau pengguna sudah login, berarti setiap permintaan yang dikirim ke server sudah aman. Ternyata ketika menggunakan SessionAuthentication, kita masih membutuhkan token CSRF untuk permintaan yang mengubah data, seperti POST, PATCH, dan DELETE. Token ini digunakan untuk membantu memastikan bahwa permintaan tersebut memang berasal dari halaman yang seharusnya, bukan dari website lain yang mencoba memanfaatkan kondisi pengguna yang sedang login. Saya juga mempelajari hal ini ketika membuat testing API. Awalnya saya menggunakan force_authenticate untuk mencoba apakah setiap peran memiliki akses yang sesuai. Namun, ternyata cara tersebut hanya membantu kita menguji akses sebagai pengguna tertentu tanpa melalui proses login biasa, sehingga belum cukup untuk memastikan perlindungan CSRF berjalan. Karena itu, saya juga menggunakan APIClient dengan enforce_csrf_checks=True dan melakukan login untuk mencoba mengirim permintaan tanpa token CSRF. Dari pengujian tersebut, permintaan berhasil ditolak dengan status 403. Saya jadi memahami bahwa menguji hak akses pengguna dan menguji perlindungan CSRF merupakan dua hal yang berbeda.
+
+---------------------------------------------------------------------------------
+
+Penggunaan AI - Tugas 6
+
+Pada Tugas 6 ini, saya menggunakan AI (ChatGPT dari OpenAI) sebagai teman belajar selama mengerjakan Django REST Framework. Awalnya saya masih cukup bingung dengan fungsi serializer, API view, dan permission karena sebelumnya saya lebih terbiasa membuat fitur menggunakan Django biasa. Saya juga sempat bertanya kenapa kita perlu menggunakan DRF, padahal website saya sebelumnya sudah bisa menampilkan dan mengelola data.
+
+Selama pengerjaan, saya meminta AI memberikan penjelasan dan arahan secara bertahap. Saya biasanya mengirimkan kode yang sedang saya kerjakan atau pesan error yang muncul, lalu meminta bantuan untuk memahami penyebabnya. Contohnya, ketika membuat pencarian Education, saya sempat mengalami error karena lupa melakukan import Q. Saya juga mengalami beberapa kegagalan testing ketika menambahkan fitur untuk menghapus gambar lama melalui serializer.
+
+Selain itu, AI membantu saya menghubungkan halaman Education dengan API tanpa mengubah desain notebook yang sudah saya buat. Salah satu bagian yang cukup membuat saya bingung adalah ketika mengubah fitur Add Education menjadi modal AJAX. Awalnya data memang berhasil ditambahkan lewat API, tetapi halaman masih berpindah setelah disimpan. Setelah mencoba lagi dan memeriksa log terminal, akhirnya saya berhasil menambahkan Education tanpa reload halaman.
+
+Saya juga tidak langsung mengikuti semua saran AI karena beberapa kali instruksinya masih terlalu umum dan belum sesuai dengan kondisi kode saya. Karena itu, saya meminta penjelasan yang lebih spesifik mengenai file dan bagian kode yang perlu diubah. Setelah menerapkannya, saya mencoba fitur tersebut di browser dan menjalankan testing sampai seluruh 43 test berhasil.
+
+Bagian yang dibantu AI: memahami REST dan DRF, serializer, permission, autentikasi, CSRF, pembuatan API Education dan Experience, debugging, integrasi AJAX, serta pemeriksaan hasil testing.
 
 Dokumentasi percakapan AI: ristek.link/AiChatAlsa
